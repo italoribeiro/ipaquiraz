@@ -64,7 +64,7 @@ export default function RootLayout({
             <div>
               <h4 className="font-black mb-6 uppercase text-[11px] tracking-[0.2em] text-white">Endereço</h4>
               <p className="text-sm opacity-70 leading-relaxed font-medium">
-                R. Açucena, 289 <br />
+                R. Açucena, 95 <br />
                 Parques das Flores <br />
                 Aquiraz - CE, 61700-000
               </p>

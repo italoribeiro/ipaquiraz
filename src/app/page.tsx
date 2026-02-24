@@ -86,11 +86,11 @@ export default function Home() {
             <span className="text-ipa-dourado font-bold tracking-widest text-xs uppercase block mb-4">Como chegar</span>
             <h2 className="text-4xl font-black text-ipa-verde tracking-tighter mb-6 uppercase">Venha nos visitar</h2>
             <p className="text-ipa-escuro/70 mb-10 text-lg font-medium leading-relaxed">
-              R. Açucena, 289 - Parques das Flores, Aquiraz-CE. <br />
+              R. Açucena, 95 - Parques das Flores, Aquiraz-CE. <br />
               Estamos de portas abertas para receber você e sua família.
             </p>
             <a 
-              href="https://www.google.com/maps/dir/?api=1&destination=Rua+Acucena+289+Aquiraz" 
+              href="https://www.google.com/maps/dir/?api=1&destination=Rua+Acucena+95+Aquiraz" 
               target="_blank" 
               className="inline-block bg-white text-ipa-verde border-2 border-ipa-verde px-8 py-4 rounded-full font-bold text-sm tracking-widest hover:bg-ipa-verde hover:text-white transition-all shadow-lg"
             >

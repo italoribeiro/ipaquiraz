@@ -68,9 +68,9 @@ export default function VisiteNos() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h2 className="text-3xl font-black text-ipa-verde uppercase tracking-tighter">Como Chegar</h2>
-            <p className="text-ipa-escuro/70 font-medium">R. Açucena, 289 - Parques das Flores, Aquiraz - CE.</p>
+            <p className="text-ipa-escuro/70 font-medium">R. Açucena, 95 - Parques das Flores, Aquiraz - CE.</p>
             <div className="flex flex-col gap-4">
-              <a href="https://maps.google.com/?q=Rua+Acucena+289+Aquiraz" target="_blank" className="inline-flex items-center justify-center gap-3 bg-ipa-verde text-white px-8 py-4 rounded-full font-black text-xs tracking-widest hover:bg-ipa-escuro transition-all shadow-lg uppercase">
+              <a href="https://maps.google.com/?q=Rua+Acucena+95+Aquiraz" target="_blank" className="inline-flex items-center justify-center gap-3 bg-ipa-verde text-white px-8 py-4 rounded-full font-black text-xs tracking-widest hover:bg-ipa-escuro transition-all shadow-lg uppercase">
                 Abrir no Google Maps
               </a>
               <a href="https://wa.me/5585999805907" className="inline-flex items-center justify-center gap-3 border-2 border-ipa-verde text-ipa-verde px-8 py-4 rounded-full font-black text-xs tracking-widest hover:bg-ipa-verde hover:text-white transition-all uppercase font-bold">
