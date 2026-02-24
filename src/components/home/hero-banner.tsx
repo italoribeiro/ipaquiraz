@@ -19,12 +19,12 @@ const slides = [
   {
     title: "Sola Fide",
     description: "A justificação é pela fé somente, um presente de Deus.",
-    image: "https://images.unsplash.com/photo-1606787503474-b28a4072fbc5?q=80&w=2070&auto=format&fit=crop", // Comunhão
+    image: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=2070&auto=format&fit=crop", // Comunhão
   },
   {
     title: "Sola Christus",
     description: "Só há um mediador entre Deus e os homens, Jesus Cristo.",
-    image: "https://images.unsplash.com/photo-1606787503474-b28a4072fbc5?q=80&w=2070&auto=format&fit=crop", // Comunhão
+    image: "https://images.unsplash.com/photo-1592818868295-f527dbac420d?q=80&w=2070&auto=format&fit=crop", // Comunhão
   },
   {
     title: "Comunhão e Fé",

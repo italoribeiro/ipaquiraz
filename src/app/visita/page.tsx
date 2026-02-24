@@ -56,7 +56,7 @@ export default function VisiteNos() {
       <section className="bg-ipa-creme py-24 px-6 border-b border-ipa-bege/20 text-center">
         <Heart size={40} className="mx-auto mb-6 text-ipa-dourado animate-pulse" />
         <h1 className="text-4xl md:text-6xl font-black text-ipa-verde tracking-tighter uppercase mb-6">
-          Você é nosso <br /> <span className="text-ipa-dourado text-3xl md:text-5xl">Convidado de Honra</span>
+          Você é nosso <br /> <span className="text-ipa-dourado text-3xl md:text-5xl">Convidado</span>
         </h1>
         <p className="text-ipa-escuro/70 text-lg font-medium leading-relaxed max-w-2xl mx-auto italic">
           "Alegrei-me quando me disseram: Vamos à casa do Senhor." — Salmo 122:1
