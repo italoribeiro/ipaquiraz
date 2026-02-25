@@ -3,6 +3,12 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Programação | Igreja Presbiteriana de Aquiraz",
   description: "Confira nossos horários de Cultos, Escola Bíblica Dominical e Reuniões de Oração. Participe da nossa comunidade em Aquiraz.",
+  keywords: [
+    "horário de culto aquiraz",
+    "culto domingo aquiraz",
+    "igreja presbiteriana horário aquiraz"
+  ]
+
 };
 
 export default function Programacao() {

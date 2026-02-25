@@ -9,8 +9,25 @@ import { Instagram, Youtube } from "lucide-react"; // Ícones para o grid vertic
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Igreja Presbiteriana de Aquiraz - Fé Reformada em Aquiraz/CE",
-  description: "Uma igreja bíblica, confessional e reformada. Junte-se a nós para cultuar ao Senhor.",
+  metadataBase: new URL("https://ipaquiraz.com.br"),
+  title: {
+    default: "Igreja Presbiteriana em Aquiraz",
+    template: "%s | Igreja Presbiteriana de Aquiraz"
+  },
+  description: "Igreja Presbiteriana em Aquiraz. Cultos, eventos, programação e comunidade cristã reformada no Ceará.",
+  keywords: [
+    "igreja presbiteriana aquiraz",
+    "igreja reformada aquiraz",
+    "culto aquiraz",
+    "igreja no eusébio",
+    "igreja presbiteriana ceará"
+   ],
+    openGraph: {
+    title: "Igreja Presbiteriana de Aquiraz",
+    description: "Conheça nossa igreja em Aquiraz.",
+    type: "website",
+    locale: "pt_BR"
+  }
 };
 
 export default function RootLayout({
@@ -21,6 +38,24 @@ export default function RootLayout({
   return (
     <html lang="pt-br" className={`${inter.variable}`}>
       <head>
+      
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Church",
+              name: "Igreja Presbiteriana de Aquiraz",
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Aquiraz",
+                addressRegion: "CE",
+                addressCountry: "BR",
+              },
+            }),
+          }}
+        />
+      
         {/* Google Analytics - Instalado corretamente para Next.js */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-4Z28X4NVF7"

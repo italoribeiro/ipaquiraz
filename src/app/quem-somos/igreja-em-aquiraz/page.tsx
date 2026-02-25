@@ -3,12 +3,12 @@ import Image from "next/image";
 
 // SEO Especializado para esta página
 export const metadata: Metadata = {
-  title: "Quem Somos | Igreja Presbiteriana de Aquiraz",
+  title: "Igreja em Aquiraz | Igreja Presbiteriana de Aquiraz",
   description: "Conheça a história da fundação da Igreja Presbiteriana de Aquiraz, iniciada pelo Reverendo Alci Chagas em 2024. Uma igreja reformada e missionária no Ceará.",
   keywords: ["história ipaquiraz", "reverendo alci chagas", "igreja presbiteriana aquiraz", "fé reformada ceará"],
 };
 
-export default function QuemSomos() {
+export default function IgrejaEmAquiraz() {
   return (
     <div className="flex flex-col w-full">
       {/* Banner Superior */}
@@ -22,7 +22,7 @@ export default function QuemSomos() {
         />
         <div className="absolute inset-0 bg-ipa-verde/60 backdrop-blur-[2px] flex items-center justify-center">
           <h1 className="text-white text-4xl md:text-6xl font-black tracking-tighter uppercase">
-            Nossa História
+            Nossa História em Aquiraz
           </h1>
         </div>
       </section>
