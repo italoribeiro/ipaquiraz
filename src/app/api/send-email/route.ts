@@ -5,10 +5,10 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
-  
   try {
-    const { type, data } = await req.json();
+    // CORREÇÃO 1: Lemos o JSON apenas uma vez
     const body = await req.json();
+    const { type, data } = body;
     console.log("Dados recebidos na API:", body);
 
     let subject = "";
@@ -67,13 +67,15 @@ export async function POST(req: Request) {
 
     // 3. Disparo do E-mail para a Igreja
     const { error } = await resend.emails.send({
-      from: 'Sistema IP Aquiraz <onboarding@resend.dev>',
-      to: ['ytaloribeiro@gmail.com'], // USE O SEU E-MAIL PESSOAL AQUI PARA TESTAR
+      // CORREÇÃO 2: Usando o seu domínio verificado
+      from: 'Portal IP Aquiraz <nao-responda@ipaquiraz.com.br>', 
+      to: ['ytaloribeiro@gmail.com'], // Mantenha o seu para testar, depois mudamos para o da igreja
       subject: subject,
       html: htmlContent,
     });
 
     if (error) {
+      console.error("Erro do Resend:", error);
       return NextResponse.json({ error }, { status: 400 });
     }
 
@@ -81,7 +83,6 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error("Erro na API de e-mail:", error);
-    
     return NextResponse.json({ error: "Erro interno no servidor" }, { status: 500 });
   }
 }
