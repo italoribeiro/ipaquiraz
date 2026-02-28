@@ -109,7 +109,7 @@ export default function RootLayout({
             <div>
               <h4 className="font-black mb-6 uppercase text-[11px] tracking-[0.2em] text-white">Links</h4>
               <div className="flex flex-col gap-3 text-sm font-bold uppercase tracking-widest text-ipa-dourado">
-                <a href="/contato" className="hover:text-white transition-colors">Pedido de Oração</a>
+                <a href="https://igrejaemaquiraz-oracao.base44.app/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Pedido de Oração</a>
                 <a href="/dizimos" className="hover:text-white transition-colors">Dízimos e Ofertas</a>
                 <a href="/quem-somos" className="hover:text-white transition-colors">Quem Somos</a>
               </div>

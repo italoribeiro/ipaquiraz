@@ -142,14 +142,26 @@ export default function VisiteNos() {
               {/* ABA: ORAÇÃO */}
               {activeTab === "oracao" && (
                 <div className="space-y-8 animate-in fade-in duration-500">
-                  <div className="border-b-2 border-ipa-bege/30 pb-2">
+                  <div className="border-b-2 border-ipa-bege/30 pb-4">
                     <label className="text-[10px] font-black text-ipa-dourado tracking-widest uppercase block mb-2">Nome ou Nome Genérico (para sigilo)</label>
                     <input name="nome" type="text" placeholder="EX: JOÃO, MARIA OU 'UM IRMÃO'" className="w-full bg-transparent outline-none text-sm font-bold uppercase" />
-                    <div className="mt-4 flex items-center gap-2">
+                    
+                    <div className="mt-4 flex items-center gap-2 mb-4">
                       <input name="sigilo" type="checkbox" id="sigilo" className="accent-ipa-verde w-4 h-4" />
                       <label htmlFor="sigilo" className="text-[10px] font-bold text-ipa-escuro/60 uppercase tracking-widest flex items-center gap-2"><ShieldCheck size={14}/> Manter nome sob sigilo absoluto</label>
                     </div>
+
+                    {/* NOVOS CAMPOS: E-mail Obrigatório e WhatsApp Opcional */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                      <div>
+                        <input name="email" type="email" placeholder="SEU E-MAIL (OBRIGATÓRIO)" required className="w-full bg-transparent outline-none text-sm font-bold uppercase border-b-2 border-ipa-bege/30 pb-2" />
+                      </div>
+                      <div>
+                        <input name="whatsapp" type="text" placeholder="SEU WHATSAPP (OPCIONAL)" className="w-full bg-transparent outline-none text-sm font-bold uppercase border-b-2 border-ipa-bege/30 pb-2" />
+                      </div>
+                    </div>
                   </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="border-b-2 border-ipa-bege/30 pb-2">
                       <label className="text-[10px] font-black text-ipa-dourado tracking-widest uppercase block mb-2">Seu Bairro / Distrito</label>
@@ -176,6 +188,10 @@ export default function VisiteNos() {
               {activeTab === "fale" && (
                 <div className="space-y-6 animate-in fade-in duration-500">
                   <input name="nome" placeholder="SEU NOME" required className="w-full bg-white p-5 rounded-2xl text-[10px] font-bold uppercase outline-none border-2 border-white focus:border-ipa-dourado" />
+                  
+                  {/* NOVO CAMPO: E-mail Obrigatório */}
+                  <input name="email" type="email" placeholder="SEU E-MAIL (OBRIGATÓRIO)" required className="w-full bg-white p-5 rounded-2xl text-[10px] font-bold uppercase outline-none border-2 border-white focus:border-ipa-dourado" />
+                  
                   <input name="assunto" placeholder="ASSUNTO" required className="w-full bg-white p-5 rounded-2xl text-[10px] font-bold uppercase outline-none border-2 border-white focus:border-ipa-dourado" />
                   <textarea name="mensagem" placeholder="SUA MENSAGEM" rows={5} required className="w-full bg-white p-5 rounded-2xl text-[10px] font-bold uppercase outline-none border-2 border-white focus:border-ipa-dourado"></textarea>
                 </div>

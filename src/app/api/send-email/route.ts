@@ -65,6 +65,23 @@ export async function POST(req: Request) {
       `;
     }
 
+    // 3. Formatação para Fale Conosco (Contato)
+    else if (type === "contato") {
+      subject = "✉️ Nova Mensagem de Contato - IP Aquiraz";
+      htmlContent = `
+        <div style="font-family: sans-serif; color: #1a3a32;">
+          <h1 style="color: #1a3a32; border-bottom: 2px solid #c5a87f; padding-bottom: 10px;">Nova Mensagem via Site</h1>
+          <p><strong>Nome:</strong> ${data.nome}</p>
+          <p><strong>E-mail/Contato:</strong> ${data.email || data.telefone || "Não informado"}</p>
+          <div style="background-color: #f8f5f0; padding: 20px; border-radius: 10px; margin-top: 20px;">
+            <p><strong>Mensagem:</strong></p>
+            <p>${data.mensagem}</p>
+          </div>
+        </div>
+      `;
+    }
+    
+
     // 3. Disparo do E-mail para a Igreja
     const { error } = await resend.emails.send({
       // CORREÇÃO 2: Usando o seu domínio verificado
