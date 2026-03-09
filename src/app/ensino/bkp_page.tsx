@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import Link from "next/link";
-import { FileText, Download, PlayCircle, BookOpen, Users, ArrowRight } from "lucide-react";
+import { FileText, Download, PlayCircle, BookOpen, Users } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Ensino e Recursos Teológicos | IP Aquiraz",
@@ -119,23 +118,25 @@ export default function Ensino() {
         </div>
       </section>
 
-      {/* 4. Módulo de Sermões (NOVO) */}
-      <section className="py-24 px-6 bg-ipa-verde text-white">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <PlayCircle size={48} className="mx-auto text-ipa-dourado opacity-90" />
+      {/* 4. Vídeos e Palestras (Embed Section) */}
+      <section className="py-24 px-6 bg-ipa-verde">
+        <div className="max-w-5xl mx-auto text-center text-white">
+          <PlayCircle size={48} className="mx-auto mb-6 text-ipa-dourado" />
+          <h2 className="text-3xl font-black uppercase tracking-tighter mb-6">Palestras e Pregações</h2>
+          <p className="mb-12 opacity-80 font-medium">Acesse nosso conteúdo em vídeo para aprofundar seu conhecimento teológico onde quer que esteja.</p>
           
-          <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter">
-            Sermões e Pregações
-          </h2>
-          
-          <p className="text-lg opacity-80 font-medium leading-relaxed max-w-2xl mx-auto">
-            Acesse nosso acervo completo de mensagens em vídeo, áudio e texto. Recursos projetados para edificar a sua fé, fundamentados na inerrância das Escrituras e na sã doutrina.
-          </p>
-
-          <Link href="/ensino/sermoes" className="inline-flex items-center justify-center gap-3 bg-ipa-dourado text-ipa-escuro px-10 py-5 rounded-full font-black text-sm tracking-widest hover:bg-white transition-all shadow-xl uppercase mt-8 group">
-            Acessar Biblioteca de Mensagens
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-2xl border-8 border-white/10">
+            {/* Exemplo de Embed do YouTube da IP Aquiraz */}
+            <iframe 
+              width="100%" 
+              height="100%" 
+              src="https://www.youtube.com/embed/videoseries?list=PL_SEU_PLAYLIST_ID" 
+              title="YouTube video player" 
+              frameBorder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowFullScreen
+            ></iframe>
+          </div>
         </div>
       </section>
     </div>

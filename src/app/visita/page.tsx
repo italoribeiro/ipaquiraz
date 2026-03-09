@@ -73,7 +73,7 @@ export default function VisiteNos() {
               <a href="https://maps.google.com/?q=Rua+Acucena+95+Aquiraz" target="_blank" className="inline-flex items-center justify-center gap-3 bg-ipa-verde text-white px-8 py-4 rounded-full font-black text-xs tracking-widest hover:bg-ipa-escuro transition-all shadow-lg uppercase">
                 Abrir no Google Maps
               </a>
-              <a href="https://wa.me/5585999805907" className="inline-flex items-center justify-center gap-3 border-2 border-ipa-verde text-ipa-verde px-8 py-4 rounded-full font-black text-xs tracking-widest hover:bg-ipa-verde hover:text-white transition-all uppercase font-bold">
+              <a href="https://wa.me/5585981832250" className="inline-flex items-center justify-center gap-3 border-2 border-ipa-verde text-ipa-verde px-8 py-4 rounded-full font-black text-xs tracking-widest hover:bg-ipa-verde hover:text-white transition-all uppercase font-bold">
                 <MessageCircle size={18} /> Dúvidas no WhatsApp
               </a>
             </div>
