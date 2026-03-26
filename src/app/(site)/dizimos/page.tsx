@@ -55,7 +55,7 @@ export default function Dizimos() {
               <div className="relative w-64 h-64 bg-white p-4 rounded-3xl shadow-2xl border-4 border-ipa-creme">
                 <Image 
                   src="/pix-ipa.png" 
-                  alt="QR Code Pix" 
+                  alt="QR Code Pix da IP Aquiraz" 
                   fill 
                   className="object-contain p-2"
                 />
@@ -123,62 +123,6 @@ export default function Dizimos() {
               CONHEÇA A CIDADE
             </a>
           </div>
-
-          {/* ========================================= */}
-          {/* VITRINE DE PARCEIROS (CARDS COM SEO)      */}
-          {/* ========================================= */}
-          <div className="mt-24 border-t border-ipa-creme pt-12">
-            <h3 className="text-center text-xs font-black text-ipa-escuro/40 uppercase tracking-[0.3em] mb-10">
-              Instituições que apoiam esta visão
-            </h3>
-            
-            {/* Grid dos Cards - ajusta automaticamente no celular e no PC */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              
-              {/* Parceiro 1: Editora IDE */}
-              <a 
-                href="https://link-da-editora-ide.com.br" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Acessar o site da Editora IDE, instituição parceira"
-                className="bg-white border border-ipa-bege/50 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-ipa-dourado/50 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center h-32 group"
-              >
-                <div className="relative w-full h-full">
-                  <Image
-                    src="/logo_inst_ide.png"
-                    alt="Logomarca da Editora IDE - Instituição Parceira do projeto de expansão da IP Aquiraz"
-                    title="Editora IDE"
-                    fill
-                    className="object-contain opacity-70 group-hover:opacity-100 transition-opacity"
-                    sizes="(max-width: 768px) 150px, 200px"
-                  />
-                </div>
-              </a>
-
-              {/* Parceiro 2: PMC */}
-              <a 
-                href="https://link-do-pmc.com.br" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Acessar o site do Plano Missionário Cooperativo"
-                className="bg-white border border-ipa-bege/50 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-ipa-dourado/50 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center h-32 group"
-              >
-                <div className="relative w-full h-full">
-                  <Image
-                    src="/logo_inst_pmc.png"
-                    alt="Logomarca do PMC (Plano Missionário Cooperativo) - Instituição Parceira"
-                    title="Plano Missionário Cooperativo"
-                    fill
-                    className="object-contain opacity-70 group-hover:opacity-100 transition-opacity"
-                    sizes="(max-width: 768px) 150px, 200px"
-                  />
-                </div>
-              </a>
-
-            </div>
-          </div>
-          {/* ========================================= */}
-
         </div>
       </section>
 
@@ -215,13 +159,71 @@ export default function Dizimos() {
                   </div>
                 ))}
                 <a 
-                  href="/transparencia" 
-                  className="sm:col-span-2 bg-ipa-bege text-ipa-verde py-5 rounded-2xl font-black text-xs tracking-[0.3em] uppercase text-center hover:bg-white transition-all shadow-xl"
+                  href="https://churchuupwebapp.base44.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="sm:col-span-2 bg-ipa-bege text-ipa-verde py-5 rounded-2xl font-black text-xs tracking-[0.3em] uppercase text-center hover:bg-white transition-all shadow-xl mt-2"
                 >
                   Acessar Portal Completo
                 </a>
               </div>
             </div>
+
+            {/* ========================================= */}
+            {/* RODAPÉ DA CAIXA ESCURA: VITRINE DE PARCEIROS */}
+            {/* ========================================= */}
+            <div className="relative z-10 mt-16 pt-12 border-t border-white/10">
+              <h3 className="text-center text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-10">
+                Instituições que apoiam esta visão
+              </h3>
+              
+              {/* Grid dos Cards centralizados no rodapé */}
+              <div className="flex flex-wrap justify-center gap-6">
+                
+                {/* Parceiro 1: Editora IDE */}
+                <a 
+                  href="https://www.instagram.com/editoraide/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Acessar o site da Editora IDE, instituição parceira"
+                  className="w-40 sm:w-48 bg-white border-2 border-white/10 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-ipa-dourado transition-all duration-300 hover:-translate-y-1 flex items-center justify-center h-24 group"
+                >
+                  <div className="relative w-full h-full">
+                    <Image
+                      src="/logo_inst_ide.png"
+                      alt="Logomarca da Editora IDE - Instituição Parceira do projeto de expansão da IP Aquiraz"
+                      title="Editora IDE"
+                      fill
+                      className="object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                      sizes="(max-width: 768px) 150px, 200px"
+                    />
+                  </div>
+                </a>
+
+                {/* Parceiro 2: PMC */}
+                <a 
+                  href="https://pmc.org.br" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Acessar o site do Plano Missionário Cooperativo"
+                  className="w-40 sm:w-48 bg-white border-2 border-white/10 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-ipa-dourado transition-all duration-300 hover:-translate-y-1 flex items-center justify-center h-24 group"
+                >
+                  <div className="relative w-full h-full">
+                    <Image
+                      src="/logo_inst_pmc.png"
+                      alt="Logomarca do PMC (Plano Missionário Cooperativo) - Instituição Parceira"
+                      title="Plano Missionário Cooperativo"
+                      fill
+                      className="object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                      sizes="(max-width: 768px) 150px, 200px"
+                    />
+                  </div>
+                </a>
+
+              </div>
+            </div>
+            {/* ========================================= */}
+
           </div>
         </div>
       </section>
