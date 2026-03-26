@@ -29,14 +29,10 @@ export default function StoryGenerator({ frase, passagem }: StoryGeneratorProps)
       // Pequeno atraso para garantir que a fonte Inter foi renderizada na div invisível
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const dataUrl = await toJpeg(storyRef.current, { 
+     const dataUrl = await toJpeg(storyRef.current, { 
         quality: 0.95,
         pixelRatio: 1,
-        // MUDANÇA AQUI: Tiramos o skipFonts (que bloqueava a Inter) 
-        // e deixamos o cacheBust para evitar erros de segurança.
         cacheBust: true,
-        useCORS: true,
-        // Forçamos a biblioteca a esperar um pouco mais pelas fontes
         fontEmbedCSS: `@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,700;1,300;1,700&display=swap');`
       });
       
