@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { Plus, Trash2 } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 // Inicia o Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
