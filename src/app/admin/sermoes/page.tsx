@@ -55,10 +55,10 @@ export default async function SermoesAdminPage() {
                     {sermao.titulo}
                   </td>
                   <td className="p-4 text-gray-500 font-medium">
-                    {sermao.site_sermoes_autores?.nome || "Sem autor"}
+                   {sermao.site_sermoes_autores?.[0]?.nome || "Sem autor"}
                   </td>
                   <td className="p-4 text-gray-500 font-medium">
-                    {sermao.site_sermoes_categorias?.nome || "Sem categoria"}
+                    {sermao.site_sermoes_categorias?.[0]?.nome || "Sem categoria"}
                   </td>
                   <td className="p-4 text-gray-500 font-medium flex items-center gap-2">
                     <Calendar size={14} />
