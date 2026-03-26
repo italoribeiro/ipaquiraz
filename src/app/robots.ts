@@ -5,6 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: ["/admin/", "/api/"], // Proíbe o Google de ler seu painel e rotas internas
     },
     sitemap: "https://ipaquiraz.com.br/sitemap.xml",
   };
