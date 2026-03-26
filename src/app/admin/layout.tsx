@@ -1,5 +1,9 @@
 // src/app/admin/layout.tsx
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -7,22 +11,52 @@ import {
   FolderTree, 
   Library, 
   BookmarkCheck,
-  LogOut 
+  LogOut,
+  Menu,
+  X
 } from "lucide-react";
 
-export const metadata = {
-  title: "Painel Administrativo | IP Aquiraz",
-  robots: "noindex, nofollow", 
-};
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [menuAberto, setMenuAberto] = useState(false);
+  const pathname = usePathname();
+
+  // Função para fechar o menu ao clicar em um link no mobile
+  const fecharMenu = () => setMenuAberto(false);
+
   return (
-    <div className="flex h-screen bg-gray-50 font-sans">
-      {/* SIDEBAR TIPO WORDPRESS */}
-      <aside className="w-68 bg-ipa-verde text-white flex flex-col shadow-2xl z-20 overflow-y-auto">
+    <div className="flex h-screen bg-gray-50 font-sans overflow-hidden">
+      
+      {/* HEADER MOBILE (Visível apenas em telas pequenas) */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-ipa-verde text-white flex items-center justify-between px-6 z-40 shadow-md">
+        <span className="font-black tracking-widest text-sm uppercase">
+          IP Aquiraz <span className="text-ipa-dourado">Admin</span>
+        </span>
+        <button 
+          onClick={() => setMenuAberto(!menuAberto)}
+          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+        >
+          {menuAberto ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* OVERLAY MOBILE (Fundo escuro quando o menu está aberto) */}
+      {menuAberto && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/60 z-40 transition-opacity"
+          onClick={fecharMenu}
+        />
+      )}
+
+      {/* SIDEBAR TIPO WORDPRESS (Responsiva) */}
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        w-72 bg-ipa-verde text-white flex flex-col shadow-2xl overflow-y-auto
+        transform transition-transform duration-300 ease-in-out
+        ${menuAberto ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}>
         
         {/* LOGO AREA */}
-        <div className="p-8 border-b border-white/5 flex flex-col items-center">
+        <div className="hidden lg:flex p-8 border-b border-white/5 flex-col items-center">
           <span className="font-black tracking-widest text-lg uppercase leading-none">
             IP Aquiraz
           </span>
@@ -31,12 +65,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </span>
         </div>
         
-        <nav className="flex-1 py-8 px-4 space-y-8">
+        <nav className="flex-1 py-8 px-4 space-y-8 mt-16 lg:mt-0">
           
           {/* DASHBOARD GERAL */}
           <div>
-            <Link href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-black uppercase tracking-wider group">
-              <LayoutDashboard size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> 
+            <Link 
+              href="/admin" 
+              onClick={fecharMenu}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-[11px] font-black uppercase tracking-wider group ${pathname === '/admin' ? 'bg-ipa-dourado text-white' : 'hover:bg-white/10'}`}
+            >
+              <LayoutDashboard size={18} className={pathname === '/admin' ? 'text-white' : 'text-ipa-dourado group-hover:scale-110 transition-transform'} /> 
               Dashboard
             </Link>
           </div>
@@ -46,13 +84,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <p className="px-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-3">
               Ministério da Palavra
             </p>
-            <Link href="/admin/sermoes" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/sermoes" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
               <BookOpen size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Sermões
             </Link>
-            <Link href="/admin/categorias" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/categorias" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
               <FolderTree size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Categorias
             </Link>
-            <Link href="/admin/autores" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/autores" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
               <Users size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Autores
             </Link>
           </div>
@@ -62,10 +100,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <p className="px-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-3">
               Educação e EBD
             </p>
-            <Link href="/admin/ebd/materiais" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/ebd/materiais" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
               <Library size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Biblioteca de Recursos
             </Link>
-            <Link href="/admin/ebd/categorias" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/ebd/categorias" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
               <BookmarkCheck size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Categorias de Ensino
             </Link>
           </div>
@@ -81,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ÁREA DE CONTEÚDO */}
-      <main className="flex-1 overflow-y-auto bg-gray-50/50">
+      <main className="flex-1 overflow-y-auto bg-gray-50/50 pt-16 lg:pt-0 w-full">
         {children}
       </main>
     </div>

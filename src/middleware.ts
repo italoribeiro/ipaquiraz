@@ -10,7 +10,7 @@ export function middleware(req: NextRequest) {
     const [user, pwd] = atob(authValue).split(':');
 
     // Aqui definimos o usuário e senha provisórios
-    if (user === 'italo' && pwd === 'admin123') {
+    if (user === 'c4lvin0' && pwd === '6TRFq.j#o?') {
       return NextResponse.next(); // Liberado!
     }
   }
