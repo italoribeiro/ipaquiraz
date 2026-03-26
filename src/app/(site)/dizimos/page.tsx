@@ -50,7 +50,7 @@ export default function Dizimos() {
               </div>
             </div>
 
-            {/* QR Code Pix - Imagem deve estar em /public/fff720.png */}
+            {/* QR Code Pix */}
             <div className="flex flex-col items-center">
               <div className="relative w-64 h-64 bg-white p-4 rounded-3xl shadow-2xl border-4 border-ipa-creme">
                 <Image 
@@ -116,13 +116,69 @@ export default function Dizimos() {
           </div>
           
           <div className="flex flex-wrap justify-center gap-6">
-            <a href="https://wa.me/5585999805907" className="bg-ipa-verde text-white px-10 py-4 rounded-full font-black text-xs tracking-widest hover:bg-ipa-escuro transition-all">
+            <a href="https://wa.me/5585981832250" className="bg-ipa-verde text-white px-10 py-4 rounded-full font-black text-xs tracking-widest hover:bg-ipa-escuro transition-all">
               SEJA UM PARCEIRO
             </a>
-            <a href="https://www.aquiraz.ce.gov.br/omunicipio.php" target="_blank" className="border-2 border-ipa-creme text-ipa-dourado px-10 py-4 rounded-full font-black text-xs tracking-widest hover:border-ipa-dourado transition-all">
+            <a href="https://www.aquiraz.ce.gov.br/omunicipio.php" target="_blank" rel="noopener noreferrer" className="border-2 border-ipa-creme text-ipa-dourado px-10 py-4 rounded-full font-black text-xs tracking-widest hover:border-ipa-dourado transition-all">
               CONHEÇA A CIDADE
             </a>
           </div>
+
+          {/* ========================================= */}
+          {/* VITRINE DE PARCEIROS (CARDS COM SEO)      */}
+          {/* ========================================= */}
+          <div className="mt-24 border-t border-ipa-creme pt-12">
+            <h3 className="text-center text-xs font-black text-ipa-escuro/40 uppercase tracking-[0.3em] mb-10">
+              Instituições que apoiam esta visão
+            </h3>
+            
+            {/* Grid dos Cards - ajusta automaticamente no celular e no PC */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              
+              {/* Parceiro 1: Editora IDE */}
+              <a 
+                href="https://link-da-editora-ide.com.br" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Acessar o site da Editora IDE, instituição parceira"
+                className="bg-white border border-ipa-bege/50 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-ipa-dourado/50 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center h-32 group"
+              >
+                <div className="relative w-full h-full">
+                  <Image
+                    src="/logo_inst_ide.png"
+                    alt="Logomarca da Editora IDE - Instituição Parceira do projeto de expansão da IP Aquiraz"
+                    title="Editora IDE"
+                    fill
+                    className="object-contain opacity-70 group-hover:opacity-100 transition-opacity"
+                    sizes="(max-width: 768px) 150px, 200px"
+                  />
+                </div>
+              </a>
+
+              {/* Parceiro 2: PMC */}
+              <a 
+                href="https://link-do-pmc.com.br" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Acessar o site do Plano Missionário Cooperativo"
+                className="bg-white border border-ipa-bege/50 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-ipa-dourado/50 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center h-32 group"
+              >
+                <div className="relative w-full h-full">
+                  <Image
+                    src="/logo_inst_pmc.png"
+                    alt="Logomarca do PMC (Plano Missionário Cooperativo) - Instituição Parceira"
+                    title="Plano Missionário Cooperativo"
+                    fill
+                    className="object-contain opacity-70 group-hover:opacity-100 transition-opacity"
+                    sizes="(max-width: 768px) 150px, 200px"
+                  />
+                </div>
+              </a>
+
+            </div>
+          </div>
+          {/* ========================================= */}
+
         </div>
       </section>
 
