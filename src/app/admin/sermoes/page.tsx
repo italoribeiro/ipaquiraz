@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { Plus, BookOpen, Calendar, Pencil } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

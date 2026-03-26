@@ -3,8 +3,10 @@ import Link from "next/link";
 import { PlayCircle, Calendar, ChevronRight } from "lucide-react";
 import { Metadata } from "next";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
-  title: "Sermões e Pregações | IP Aquiraz",
+  title: "Sermões e Pregações | Igreja Presbiteriana de Aquiraz",
   description: "Ouça e assista aos sermões, pregações e palestras da Igreja Presbiteriana de Aquiraz. Uma abordagem fiel às Escrituras e à Teologia Reformada.",
 };
 
