@@ -1,6 +1,9 @@
+// src/app/ensino/page.tsx
 import { Metadata } from "next";
 import Link from "next/link";
-import { FileText, Download, PlayCircle, BookOpen, Users, ArrowRight } from "lucide-react";
+import { PlayCircle, BookOpen, Users, ArrowRight } from "lucide-react";
+// 1. IMPORTAMOS O NOSSO NOVO COMPONENTE
+import BibliotecaDinamica from "@/components/ensino/BibliotecaDinamica";
 
 export const metadata: Metadata = {
   title: "Ensino e Recursos Teológicos | IP Aquiraz",
@@ -29,23 +32,6 @@ const classes = [
     desc: "Em breve: Uma série de estudos sobre o lar à luz das Escrituras.",
     icon: <Users size={24} />,
     status: "Em Breve"
-  }
-];
-
-const categoriasEstudos = [
-  {
-    tema: "Sola Scriptura: Estudos Bíblicos",
-    materiais: [
-      { titulo: "Introdução à Fé Reformada", autor: "Rev. Alci Chagas", tipo: "PDF", link: "#" },
-      { titulo: "Exposição em Romanos - Cap 1 a 4", autor: "Equipe de Ensino", tipo: "PDF", link: "#" },
-    ]
-  },
-  {
-    tema: "Doutrina e Confessionalidade",
-    materiais: [
-      { titulo: "Breve Catecismo Comentado", autor: "Recurso Externo", tipo: "Link", link: "#" },
-      { titulo: "As 5 Solas da Reforma", autor: "Rev. Alci Chagas", tipo: "PDF", link: "#" },
-    ]
   }
 ];
 
@@ -86,40 +72,23 @@ export default function Ensino() {
         </div>
       </section>
 
-      {/* 3. Biblioteca de Recursos (Grid Inteligente por Temas) */}
+      {/* 3. BIBLIOTECA DE RECURSOS (AGORA É DINÂMICA!) */}
       <section className="py-20 px-6 bg-ipa-creme/20">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-black text-ipa-verde uppercase tracking-tighter mb-12 text-center">
-            Biblioteca de Recursos
-          </h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {categoriasEstudos.map((cat, idx) => (
-              <div key={idx} className="space-y-6">
-                <h4 className="text-sm font-black text-ipa-dourado uppercase tracking-[0.2em] mb-4">{cat.tema}</h4>
-                <div className="space-y-3">
-                  {cat.materiais.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between p-5 bg-white rounded-2xl border border-ipa-bege/20 hover:border-ipa-verde transition-all group">
-                      <div className="flex items-center gap-4">
-                        <FileText className="text-ipa-bege group-hover:text-ipa-verde transition-colors" size={20} />
-                        <div>
-                          <p className="text-sm font-bold text-ipa-verde uppercase tracking-tight">{item.titulo}</p>
-                          <p className="text-[10px] text-ipa-escuro/40 font-bold uppercase">{item.autor}</p>
-                        </div>
-                      </div>
-                      <a href={item.link} className="p-2 bg-ipa-creme rounded-lg text-ipa-verde hover:bg-ipa-verde hover:text-white transition-all">
-                        <Download size={16} />
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-black text-ipa-verde uppercase tracking-tighter mb-2">
+              Biblioteca de Recursos
+            </h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-ipa-dourado">Material de Estudo e Edificação</p>
           </div>
+          
+          {/* 2. INJETAMOS O COMPONENTE AQUI */}
+          <BibliotecaDinamica />
+
         </div>
       </section>
 
-      {/* 4. Módulo de Sermões (NOVO) */}
+      {/* 4. Módulo de Sermões */}
       <section className="py-24 px-6 bg-ipa-verde text-white">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <PlayCircle size={48} className="mx-auto text-ipa-dourado opacity-90" />

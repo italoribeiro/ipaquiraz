@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "igreja no eusébio",
     "igreja presbiteriana ceará"
    ],
-    openGraph: {
+   openGraph: {
     title: "Igreja Presbiteriana de Aquiraz",
     description: "Conheça nossa igreja em Aquiraz.",
     type: "website",
@@ -155,8 +155,23 @@ export default function RootLayout({
             </div>
           </div>
 
-          <div className="mt-16 pt-8 border-t border-white/5 text-center text-[9px] font-bold opacity-30 uppercase tracking-[0.3em]">
-            © 2026 Igreja Presbiteriana de Aquiraz - Soli Deo Gloria
+          {/* RODAPÉ FINAL COM AUTORIA */}
+          <div className="mt-16 pt-8 border-t border-white/5 flex flex-col items-center gap-4 text-center">
+            <div className="text-[9px] font-bold opacity-30 uppercase tracking-[0.3em]">
+              © 2026 Igreja Presbiteriana de Aquiraz - Soli Deo Gloria
+            </div>
+            
+            <div className="text-[10px] font-medium opacity-60 uppercase tracking-widest">
+              Desenvolvido com <span className="text-red-500">❤</span> por{" "}
+              <a 
+                href="https://www.linkedin.com/in/italo-ribeiro-b6376320/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-ipa-dourado font-black hover:text-white transition-colors"
+              >
+                Ítalo Ribeiro
+              </a>
+            </div>
           </div>
         </footer>
       </body>
