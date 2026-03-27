@@ -17,7 +17,8 @@ export const metadata: Metadata = {
     "comunidade cristã em aquiraz",
     "igreja reformada no ceará",
     "igreja presbiteriana do brasil em aquiraz",
-    "história da igreja presbiteriana de aquiraz"
+    "história da igreja presbiteriana de aquiraz",
+    "igrejas em aquiraz"
   ],
 };
 
