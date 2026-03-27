@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 
-// SEO Especializado para esta página
+// SEO Especializado (Pode ficar aqui mesmo, pois este é um Server Component)
 export const metadata: Metadata = {
   title: "Quem Somos | Igreja Presbiteriana de Aquiraz",
   description: "Conheça a história da fundação da Igreja Presbiteriana de Aquiraz, iniciada pelo Reverendo Alci Chagas em 2024. Uma igreja reformada e missionária no Ceará.",
@@ -9,20 +9,16 @@ export const metadata: Metadata = {
     "história ipaquiraz", 
     "reverendo alci chagas", 
     "igreja presbiteriana aquiraz",
-     "fé reformada ceará",
+    "fé reformada ceará",
     "plantação de igreja aquiraz",
-     "Igreja reformada",
-     "fundação igreja presbiteriana de aquiraz",
-     "missões em aquiraz",
-     "comunidade cristã em aquiraz",
-      "igreja reformada no ceará",
-      "igreja presbiteriana do brasil em aquiraz",
-      "igreja reformada em aquiraz",
-      "história da igreja presbiteriana de aquiraz",  
-    "fundação da igreja presbiteriana de aquiraz",
-    "reverendo alci chagas história",
-    "igreja presbiteriana de aquiraz história", 
-    ],
+    "igreja reformada",
+    "fundação igreja presbiteriana de aquiraz",
+    "missões em aquiraz",
+    "comunidade cristã em aquiraz",
+    "igreja reformada no ceará",
+    "igreja presbiteriana do brasil em aquiraz",
+    "história da igreja presbiteriana de aquiraz"
+  ],
 };
 
 export default function QuemSomos() {
@@ -44,25 +40,46 @@ export default function QuemSomos() {
         </div>
       </section>
 
-      {/* Conteúdo Institucional */}
+      {/* Conteúdo Institucional com Títulos Otimizados para SEO */}
       <section className="py-20 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
+          
           <span className="text-ipa-dourado font-bold tracking-[0.3em] text-xs uppercase block mb-6 text-center md:text-left">
-            Fundação e Propósito
+            Missão e Propósito
           </span>
           
           <div className="space-y-8 text-ipa-escuro/80 text-lg leading-relaxed font-medium font-sans">
-            <p>
-              A **Igreja Presbiteriana de Aquiraz** nasceu de um ardente desejo missionário de estabelecer o testemunho da fé reformada em solo aquiraense. Fundada em **Abril de 2024**, a igreja é fruto de uma parceria estratégica entre o **Pastor Alci Chagas** e o **PLCE**.
-            </p>
+            
+            {/* H2 Invisível para o leitor comum, mas com grande peso para o Google */}
+            <div>
+              <h2 className="text-2xl font-black text-ipa-verde uppercase tracking-tighter mb-4">
+                A Fundação da Igreja Presbiteriana de Aquiraz
+              </h2>
+              <p>
+                A <strong>Igreja Presbiteriana de Aquiraz</strong> nasceu de um ardente desejo missionário de estabelecer o testemunho da fé reformada em solo aquiraense. Fundada em <strong>6 Abril de 2024</strong>, a igreja é fruto de uma parceria estratégica entre o <strong>Pastor Alci Chagas</strong> e o <strong>PLCE</strong>.
+              </p>
+            </div>
 
-            <p>
-              O Reverendo Alci Chagas, um experiente pastor dedicado à revitalização de igrejas e à plantação de novos campos missionários, sentiu o chamado ao visitar Aquiraz. Ao observar a ausência de uma Igreja Presbiteriana do Brasil na região, ele compreendeu a urgência de plantar ali uma comunidade que zelasse pela sã doutrina.
-            </p>
+            {/* H3 para pegar a cauda longa de pesquisa do pastor */}
+            <div>
+              <h3 className="text-xl font-bold text-ipa-dourado uppercase tracking-widest mb-4 mt-8">
+                A Visão do Reverendo Alci Chagas
+              </h3>
+              <p>
+                O Reverendo Alci Chagas, um experiente pastor dedicado à revitalização de igrejas e à plantação de novos campos missionários, sentiu o chamado ao visitar Aquiraz. Ao observar a ausência de uma Igreja Presbiteriana do Brasil na região, ele compreendeu a urgência de plantar ali uma comunidade que zelasse pela sã doutrina.
+              </p>
+            </div>
 
-            <p>
-              Movido por essa visão, formou-se uma sólida aliança entre o Presidente do Presbitério, irmãos dedicados e parceiros de fé para a abertura deste campo missionário.
-            </p>
+            {/* H3 focado em "igreja reformada no ceará" */}
+            <div>
+              <h3 className="text-xl font-bold text-ipa-dourado uppercase tracking-widest mb-4 mt-8">
+                Uma Igreja Reformada no Ceará
+              </h3>
+              <p>
+                Movido por essa visão de expansão da fé cristã no Nordeste, formou-se uma sólida aliança entre o Presidente do Presbitério, irmãos dedicados e parceiros de fé para a abertura deste campo missionário.
+              </p>
+            </div>
+
           </div>
 
           {/* Assinatura do Pastor */}
