@@ -20,7 +20,14 @@ export const metadata: Metadata = {
     "igreja reformada aquiraz",
     "culto aquiraz",
     "igreja no eusébio",
-    "igreja presbiteriana ceará"
+    "igreja presbiteriana ceará",
+    "igreja em aquiraz",
+    "comunidade cristã aquiraz",
+    "eventos igreja aquiraz",
+    "programação igreja aquiraz",
+    "dízimos e ofertas aquiraz",
+    "pedido de oração aquiraz" 
+
    ],
    openGraph: {
     title: "Igreja Presbiteriana de Aquiraz",
