@@ -1,31 +1,7 @@
 "use client";
-import { Metadata } from "next";
 import { useState, useEffect } from "react";
 import { Heart, MapPin, Car, Info, Send, Plus, Trash2, Mail, MessageCircle, UserPlus, Clock, ShieldCheck } from "lucide-react";
 import { handleFormSubmit } from "@/controllers/formcontroller";
-
-// SEO Especializado para esta página
-export const metadata: Metadata = {
-  title: "Visite a IPB em Aquiraz | Igreja Presbiteriana de Aquiraz",
-  description: "Planeje sua visita à Igreja Presbiteriana de Aquiraz. Encontre nosso endereço, horários de culto e um formulário para programar sua visita ou enviar pedidos de oração. Estamos ansiosos para recebê-lo!",
-  keywords: [
-    "visitar igreja presbiteriana de aquiraz",
-    "endereço igreja presbiteriana de aquiraz",
-    "horário de culto igreja presbiteriana de aquiraz", 
-    "programar visita igreja presbiteriana de aquiraz",
-    "pedido de oração igreja presbiteriana de aquiraz",
-    "fale conosco igreja presbiteriana de aquiraz", 
-    "como chegar igreja presbiteriana de aquiraz",
-    "formulário de visita igreja presbiteriana de aquiraz",
-    "formulário de oração igreja presbiteriana de aquiraz", 
-    "formulário fale conosco igreja presbiteriana de aquiraz",
-    "igreja presbiteriana de aquiraz contato",
-    "visite a igreja presbiteriana de aquiraz", 
-    "programar visita à igreja presbiteriana de aquiraz",
-    "pedidos de oração para igreja presbiteriana de aquiraz",
-    "fale conosco igreja presbiteriana de aquiraz", 
-    ],
-};
 
 const distritos = ["Aquiraz (Sede)", "Assis Teixeira", "Camará", "Caponga da Bernarda", "Jacaúna", "João de Castro", "Justiniano de Serpa", "Patacas", "Tapera"];
 const motivos = ["Enfermidade", "Família", "Problemas Financeiros", "Vida Espiritual", "Desemprego", "Luto", "Gratidão"];
