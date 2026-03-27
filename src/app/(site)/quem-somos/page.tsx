@@ -18,7 +18,10 @@ export const metadata: Metadata = {
     "igreja reformada no ceará",
     "igreja presbiteriana do brasil em aquiraz",
     "história da igreja presbiteriana de aquiraz",
-    "igrejas em aquiraz"
+    "igrejas em aquiraz",
+    "igrejas reformadas no nordeste",
+    "igrejas reformadas na região de aquiraz",
+    "igrejas presbiterianas na região metropolitana de fortaleza",
   ],
 };
 
