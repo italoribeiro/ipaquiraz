@@ -6,7 +6,18 @@ export const metadata: Metadata = {
   keywords: [
     "horário de culto aquiraz",
     "culto domingo aquiraz",
-    "igreja presbiteriana horário aquiraz"
+    "igreja presbiteriana horário aquiraz",
+    "Igreja reformada",
+    "Escola Bíblica Dominical aquiraz",
+    "reunião de oração aquiraz",
+    "programação igreja presbiteriana de aquiraz",
+    "agenda de atividades igreja presbiteriana de aquiraz", 
+    "eventos igreja presbiteriana de aquiraz",
+    "culto de adoração aquiraz",
+    "estudo bíblico aquiraz",
+    "vida comunitária aquiraz",
+    "programação semanal igreja presbiteriana de aquiraz",
+
   ]
 
 };

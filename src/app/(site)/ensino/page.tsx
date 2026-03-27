@@ -6,7 +6,7 @@ import { PlayCircle, BookOpen, Users, ArrowRight } from "lucide-react";
 import BibliotecaDinamica from "@/components/ensino/BibliotecaDinamica";
 
 export const metadata: Metadata = {
-  title: "Ensino e Recursos Teológicos | IP Aquiraz",
+  title: "Ensino e Recursos Teológicos | Igreja Presbiteriana do Brasil em Aquiraz",
   description: "Explore nossa biblioteca de estudos bíblicos, palestras e classes da EBD. Material focado na Teologia Reformada, Confessionalidade e Sã Doutrina em Aquiraz.",
   keywords: ["estudos bíblicos pdf", "teologia reformada", "escola bíblica dominical", "presbiterianismo", "cursos teológicos aquiraz"],
 };

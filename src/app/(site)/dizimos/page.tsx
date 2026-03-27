@@ -3,8 +3,28 @@ import Image from "next/image";
 import { HeartHandshake, Landmark, Users, TrendingUp, Globe, CreditCard } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Dízimos, Ofertas e Parcerias | IP Aquiraz",
+  title: "Dízimos, Ofertas e Parcerias | Igreja Presbiteriana Aquiraz",
   description: "Seja um cooperador da obra de Deus em Aquiraz. Contribua com o campo missionário e conheça nossos projetos de expansão do Reino.",
+ keywords: [
+    "doação igreja aquiraz",
+    "culto domingo aquiraz",
+    "igreja presbiteriana ofertas aquiraz",
+    "Igreja reformada",
+    "Parcerias missionárias Aquiraz",
+    "Parcerias institucionais Aquiraz",
+    "Mesa administrativa Aquiraz",
+    "Portal da transparência Aquiraz",
+    "ofertas e dízimos igreja aquiraz",
+    "como contribuir igreja aquiraz",
+    "dados bancários igreja aquiraz", 
+    "QR Code Pix igreja aquiraz",
+    "investimento missionário Aquiraz",
+    "parceiros da igreja Aquiraz",
+    "transparência financeira igreja aquiraz",
+    "Instituições parceiras igreja aquiraz",
+    "evangelismo e expansão Aquiraz",
+  ]
+
 };
 
 export default function Dizimos() {
