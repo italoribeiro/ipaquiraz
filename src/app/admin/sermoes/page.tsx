@@ -1,4 +1,3 @@
-// src/app/admin/sermoes/page.tsx
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { Plus, BookOpen, Calendar, Pencil } from "lucide-react";
@@ -11,6 +10,7 @@ const supabase = createClient(
 );
 
 export default async function SermoesAdminPage() {
+  // Ajuste fino na consulta do Supabase para o JOIN funcionar perfeitamente
   const { data: sermoes } = await supabase
     .from("site_sermoes_mensagens")
     .select(`
@@ -49,22 +49,30 @@ export default async function SermoesAdminPage() {
             </tr>
           </thead>
           <tbody>
-            {sermoes?.map(function (sermao) {
+            {sermoes?.map(function (sermao: any) {
               return (
                 <tr key={sermao.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="p-4 font-bold text-ipa-escuro flex items-center gap-3">
-                    <BookOpen size={16} className="text-ipa-dourado" />
-                    {sermao.titulo}
+                  <td className="p-4 font-bold text-ipa-escuro">
+                    <div className="flex items-center gap-3">
+                      <BookOpen size={16} className="text-ipa-dourado shrink-0" />
+                      {sermao.titulo}
+                    </div>
+                  </td>
+                  
+                  {/* A mágica acontece aqui: Acessando o objeto do JOIN diretamente */}
+                  <td className="p-4 text-gray-500 font-medium">
+                   {sermao.site_sermoes_autores?.nome || "Sem autor"}
                   </td>
                   <td className="p-4 text-gray-500 font-medium">
-                   {sermao.site_sermoes_autores?.[0]?.nome || "Sem autor"}
+                    {sermao.site_sermoes_categorias?.nome || "Sem categoria"}
                   </td>
+                  
                   <td className="p-4 text-gray-500 font-medium">
-                    {sermao.site_sermoes_categorias?.[0]?.nome || "Sem categoria"}
-                  </td>
-                  <td className="p-4 text-gray-500 font-medium flex items-center gap-2">
-                    <Calendar size={14} />
-                    {new Date(sermao.data_pregacao).toLocaleDateString('pt-BR')}
+                    <div className="flex items-center gap-2">
+                      <Calendar size={14} className="shrink-0" />
+                      {/* Tratamento para evitar erro se a data vier vazia */}
+                      {sermao.data_pregacao ? new Date(sermao.data_pregacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}
+                    </div>
                   </td>
                   <td className="p-4 text-center">
                     <Link 
