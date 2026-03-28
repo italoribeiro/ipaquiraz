@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Loader2, Filter, X } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 
 export default function BarraBuscaPosts({ categorias }: { categorias: any[] }) {
   const router = useRouter();
@@ -14,17 +14,29 @@ export default function BarraBuscaPosts({ categorias }: { categorias: any[] }) {
   const [categoria, setCategoria] = useState(searchParams.get("cat") || "");
   const [status, setStatus] = useState(searchParams.get("status") || "");
 
+  // Sincroniza os campos se a URL mudar (ex: ao limpar filtros)
+  useEffect(() => {
+    setBusca(searchParams.get("q") || "");
+    setCategoria(searchParams.get("cat") || "");
+    setStatus(searchParams.get("status") || "");
+  }, [searchParams]);
+
   function handleApplyFilters(e: React.FormEvent) {
-    e.preventDefault(); // Evita o reload da página
+    e.preventDefault();
 
     const params = new URLSearchParams();
-    params.set("page", "1"); // Sempre volta para a página 1 ao filtrar
+    params.set("page", "1"); // Sempre reseta para a página 1
 
-    if (busca) params.set("q", busca);
+    if (busca.trim()) params.set("q", busca.trim());
     if (categoria) params.set("cat", categoria);
-    if (status) params.set("status", status);
+    
+    // CORREÇÃO: Verifica se não é string vazia, permitindo o valor "0"
+    if (status !== "" && status !== null) {
+      params.set("status", status);
+    }
 
     startTransition(() => {
+      // Faz o push para a URL. O page.tsx vai capturar e filtrar no banco.
       router.push(`/admin/posts?${params.toString()}`);
     });
   }
@@ -46,7 +58,7 @@ export default function BarraBuscaPosts({ categorias }: { categorias: any[] }) {
       
       {/* Busca por Texto */}
       <div className="flex-1 w-full space-y-1.5">
-        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Pesquisar</label>
+        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 font-sans">Pesquisar</label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input 
@@ -61,7 +73,7 @@ export default function BarraBuscaPosts({ categorias }: { categorias: any[] }) {
 
       {/* Categoria */}
       <div className="w-full lg:w-48 space-y-1.5">
-        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Categoria</label>
+        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 font-sans">Categoria</label>
         <select 
           value={categoria}
           onChange={(e) => setCategoria(e.target.value)}
@@ -76,7 +88,7 @@ export default function BarraBuscaPosts({ categorias }: { categorias: any[] }) {
 
       {/* Status */}
       <div className="w-full lg:w-48 space-y-1.5">
-        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Status</label>
+        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 font-sans">Status</label>
         <select 
           value={status}
           onChange={(e) => setStatus(e.target.value)}
@@ -92,11 +104,11 @@ export default function BarraBuscaPosts({ categorias }: { categorias: any[] }) {
 
       {/* Botões de Ação */}
       <div className="flex gap-2 w-full lg:w-auto">
-        {(busca || categoria || status) && (
+        {(searchParams.get("q") || searchParams.get("cat") || searchParams.get("status")) && (
           <button
             type="button"
             onClick={limparFiltros}
-            className="p-2.5 bg-gray-100 text-gray-500 hover:bg-gray-200 rounded-xl transition-all"
+            className="p-2.5 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-white rounded-xl transition-all"
             title="Limpar Filtros"
           >
             <X size={20} />
@@ -106,7 +118,7 @@ export default function BarraBuscaPosts({ categorias }: { categorias: any[] }) {
         <button 
           type="submit"
           disabled={isPending}
-          className="flex-1 lg:flex-none bg-ipa-verde hover:bg-ipa-escuro text-white px-6 py-2.5 rounded-xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50"
+          className="flex-1 lg:flex-none bg-ipa-verde hover:bg-ipa-escuro text-white px-8 py-2.5 rounded-xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50"
         >
           {isPending ? (
             <Loader2 className="animate-spin" size={16} />
