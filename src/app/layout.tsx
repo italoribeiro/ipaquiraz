@@ -154,7 +154,7 @@ export default function RootLayout({
             <div className="flex flex-col items-center md:items-start">
               <h4 className="font-black mb-6 uppercase text-[11px] tracking-[0.2em] text-white">Contato</h4>
               <a 
-                href="https://wa.me/5585900000000" 
+                href="https://wa.me/5585981832250?text=Olá%20Igreja%20Presbiteriana%20de%20Aquiraz,%20gostaria%20de%20saber%20mais%20sobre%20os%20cultos%20e%20eventos." 
                 className="bg-white/5 border border-white/10 px-8 py-3 rounded-full text-[10px] font-black tracking-widest hover:bg-white hover:text-ipa-verde transition-all text-center"
               >
                 WHATSAPP
