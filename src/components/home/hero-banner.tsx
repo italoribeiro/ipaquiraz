@@ -9,7 +9,7 @@ import Link from "next/link"; // <-- Importação do Link do Next.js
 const slides = [
   {
     title: "Contribua com essa missão em Aquiraz-CE",
-    description: "Seja um parceiro desse projeto",
+    description: "Seja um parceiro desse projeto,doe alimentos, doe recursos,doe seu tempo, doe seu talento, doe sua vida para a glória de Deus e o crescimento do Reino de Cristo.",
     image: "https://images.unsplash.com/photo-1476304884326-cd2c88572c5f?q=80&w=2070&auto=format&fit=crop",
     imageAlt: "Doação e parceria representando a missão da Igreja Presbiteriana de Aquiraz",
     link: "/dizimos", // <-- Rota de destino
