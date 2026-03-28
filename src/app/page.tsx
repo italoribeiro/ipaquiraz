@@ -1,4 +1,5 @@
 import HeroBanner from "@/components/home/hero-banner";
+import ModalOracao from "@/components/home/ModalOracao";
 
 export default function Home() {
   return (
@@ -108,6 +109,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* 5. Modal de Pedido de Oração (Aparece após 1.5s) */}
+      <ModalOracao />
+
     </div>
   );
 }
