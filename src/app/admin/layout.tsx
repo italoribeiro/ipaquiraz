@@ -13,7 +13,8 @@ import {
   BookmarkCheck,
   LogOut,
   Menu,
-  X
+  X,
+  ImageIcon // <-- Adicionei o ícone de imagem aqui
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -22,6 +23,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Função para fechar o menu ao clicar em um link no mobile
   const fecharMenu = () => setMenuAberto(false);
+
+  // Lógica para verificar se a rota de banners está ativa
+  const isBannersActive = pathname.startsWith('/admin/home/banners');
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden">
@@ -39,7 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </div>
 
-      {/* OVERLAY MOBILE (Fundo escuro quando o menu está aberto) */}
+      {/* OVERLAY MOBILE */}
       {menuAberto && (
         <div 
           className="lg:hidden fixed inset-0 bg-black/60 z-40 transition-opacity"
@@ -47,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
 
-      {/* SIDEBAR TIPO WORDPRESS (Responsiva) */}
+      {/* SIDEBAR */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-50
         w-72 bg-ipa-verde text-white flex flex-col shadow-2xl overflow-y-auto
@@ -108,13 +112,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
           </div>
 
+          {/* --- NOVO GRUPO: SITE PRINCIPAL --- */}
+          <div className="space-y-1">
+            <p className="px-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-3">
+              Site Principal
+            </p>
+            <Link 
+              href="/admin/home/banners" 
+              onClick={fecharMenu} 
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-[11px] font-bold uppercase tracking-wider group ${isBannersActive ? 'bg-ipa-dourado text-white' : 'hover:bg-white/10'}`}
+            >
+              <ImageIcon size={18} className={isBannersActive ? 'text-white' : 'text-ipa-dourado group-hover:scale-110 transition-transform'} /> 
+              Banners da Home
+            </Link>
+          </div>
+
         </nav>
 
         {/* FOOTER DA SIDEBAR */}
         <div className="p-4 border-t border-white/5">
-           <Link href="/" className="flex items-center justify-center gap-2 w-full py-3 bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-400 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest">
+            <Link href="/" className="flex items-center justify-center gap-2 w-full py-3 bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-400 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest">
               <LogOut size={14} /> Sair do Painel
-           </Link>
+            </Link>
         </div>
       </aside>
 
