@@ -8,6 +8,13 @@ import Link from "next/link"; // <-- Importação do Link do Next.js
 
 const slides = [
   {
+    title: "Contribua com essa missão em Aquiraz-CE",
+    description: "Seja um parceiro desse projeto",
+    image: "https://images.unsplash.com/photo-1476304884326-cd2c88572c5f?q=80&w=2070&auto=format&fit=crop",
+    imageAlt: "Doação e parceria representando a missão da Igreja Presbiteriana de Aquiraz",
+    link: "/dizimos", // <-- Rota de destino
+  },
+  {
     title: "Sola Scriptura",
     description: "A autoridade final em matéria de fé e prática.",
     image: "https://images.unsplash.com/photo-1536704231234-beca9772ca68?q=80&w=2070&auto=format&fit=crop",
