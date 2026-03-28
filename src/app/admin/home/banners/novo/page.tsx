@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Save, Image as ImageIcon, Link as LinkIcon, CalendarClock, Settings, UploadCloud } from "lucide-react";
+import { ChevronLeft, Save, Image as ImageIcon, Link as LinkIcon, CalendarClock, Settings } from "lucide-react";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,11 +15,14 @@ export default function NovoBannerPage() {
   const router = useRouter();
   const [carregando, setCarregando] = useState(false);
 
-  // ESTADOS DO FORMULÁRIO (Textos e Configurações)
+  // ESTADOS DO FORMULÁRIO
   const [ativo, setAtivo] = useState(true);
   const [titulo, setTitulo] = useState("");
   const [subtitulo, setSubtitulo] = useState("");
   const [textoBotao, setTextoBotao] = useState("");
+  
+  const [imagemDesktopUrl, setImagemDesktopUrl] = useState("");
+  const [imagemMobileUrl, setImagemMobileUrl] = useState("");
   
   const [linkDestino, setLinkDestino] = useState("");
   const [linkAbertura, setLinkAbertura] = useState("_self");
@@ -32,91 +35,39 @@ export default function NovoBannerPage() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
 
-  // ESTADOS DE IMAGEM (Flexível: Upload ou Link)
-  const [modoDesktop, setModoDesktop] = useState<"upload" | "link">("upload");
-  const [imagemDesktopUrl, setImagemDesktopUrl] = useState("");
-  const [arquivoDesktop, setArquivoDesktop] = useState<File | null>(null);
-
-  const [modoMobile, setModoMobile] = useState<"upload" | "link">("upload");
-  const [imagemMobileUrl, setImagemMobileUrl] = useState("");
-  const [arquivoMobile, setArquivoMobile] = useState<File | null>(null);
-
-  // FUNÇÃO AUXILIAR DE UPLOAD
-  async function fazerUploadImagem(arquivo: File, prefixo: string) {
-    const extensao = arquivo.name.split('.').pop();
-    const nomeArquivo = `banner_${prefixo}_${Date.now()}.${extensao}`;
-    
-    const { data, error } = await supabase.storage
-      .from('site_imagens')
-      .upload(nomeArquivo, arquivo, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (error) throw error;
-
-    const { data: urlData } = supabase.storage
-      .from('site_imagens')
-      .getPublicUrl(nomeArquivo);
-
-    return urlData.publicUrl;
-  }
-
-  // FUNÇÃO PRINCIPAL DE SALVAR
   async function salvarBanner(e: React.FormEvent) {
     e.preventDefault();
     setCarregando(true);
 
-    try {
-      // 1. Validar Imagem Desktop (Obrigatória)
-      if (modoDesktop === "link" && !imagemDesktopUrl) {
-        throw new Error("A URL da imagem Desktop é obrigatória!");
-      }
-      if (modoDesktop === "upload" && !arquivoDesktop) {
-        throw new Error("Selecione um ficheiro de imagem para o Desktop!");
-      }
+    if (!imagemDesktopUrl) {
+      alert("A imagem para Desktop é obrigatória!");
+      setCarregando(false);
+      return;
+    }
 
-      // 2. Processar Imagem Desktop
-      let urlFinalDesktop = imagemDesktopUrl;
-      if (modoDesktop === "upload" && arquivoDesktop) {
-        urlFinalDesktop = await fazerUploadImagem(arquivoDesktop, 'desktop');
-      }
+    const { error } = await supabase.from("site_banners").insert([{
+      ativo,
+      titulo,
+      subtitulo: subtitulo || null,
+      texto_botao: textoBotao || null,
+      imagem_desktop_url: imagemDesktopUrl,
+      imagem_mobile_url: imagemMobileUrl || null,
+      link_destino: linkDestino || null,
+      link_abertura: linkAbertura,
+      texto_aviso_modal: textoAvisoModal || null,
+      tempo_exibicao: tempoExibicao,
+      overlay_opacidade: overlayOpacidade,
+      seo_alt: seoAlt || null,
+      data_inicio: dataInicio ? new Date(dataInicio).toISOString() : null,
+      data_fim: dataFim ? new Date(dataFim).toISOString() : null,
+    }]);
 
-      // 3. Processar Imagem Mobile (Opcional)
-      let urlFinalMobile = imagemMobileUrl;
-      if (modoMobile === "upload" && arquivoMobile) {
-        urlFinalMobile = await fazerUploadImagem(arquivoMobile, 'mobile');
-      } else if (modoMobile === "link" && !imagemMobileUrl) {
-        urlFinalMobile = ""; // Se não preencheu, fica vazio
-      }
-
-      // 4. Guardar no Banco de Dados
-      const { error } = await supabase.from("site_banners").insert([{
-        ativo,
-        titulo,
-        subtitulo: subtitulo || null,
-        texto_botao: textoBotao || null,
-        imagem_desktop_url: urlFinalDesktop,
-        imagem_mobile_url: urlFinalMobile || null,
-        link_destino: linkDestino || null,
-        link_abertura: linkAbertura,
-        texto_aviso_modal: textoAvisoModal || null,
-        tempo_exibicao: tempoExibicao,
-        overlay_opacidade: overlayOpacidade,
-        seo_alt: seoAlt || null,
-        data_inicio: dataInicio ? new Date(dataInicio).toISOString() : null,
-        data_fim: dataFim ? new Date(dataFim).toISOString() : null,
-      }]);
-
-      if (error) throw error;
-
-      // Sucesso! Volta para a listagem
+    if (error) {
+      alert("Erro ao salvar banner: " + error.message);
+      setCarregando(false);
+    } else {
       router.push("/admin/home/banners");
       router.refresh();
-
-    } catch (err: any) {
-      alert(err.message);
-      setCarregando(false);
     }
   }
 
@@ -135,7 +86,7 @@ export default function NovoBannerPage() {
               Novo Banner
             </h1>
             <button type="submit" disabled={carregando} className="bg-ipa-dourado hover:bg-yellow-600 text-white px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-sm flex items-center gap-3 transition-colors shadow-lg">
-              {carregando ? "A processar..." : <><Save size={18} /> Publicar Banner</>}
+              {carregando ? "Salvando..." : <><Save size={18} /> Publicar Banner</>}
             </button>
           </div>
 
@@ -158,53 +109,21 @@ export default function NovoBannerPage() {
               </div>
             </div>
 
-            {/* Bloco 2: Imagens (AGORA COM UPLOAD E LINK) */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-6">
+            {/* Bloco 2: Imagens */}
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
               <h3 className="font-black text-ipa-escuro uppercase tracking-widest text-xs flex items-center gap-2 border-b border-gray-50 pb-3">
                 <ImageIcon size={14} className="text-ipa-dourado"/> Imagens Responsivas
               </h3>
               
-              {/* IMAGEM DESKTOP */}
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Imagem Desktop * (Horizontal)</label>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button type="button" onClick={() => setModoDesktop("upload")} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-1 ${modoDesktop === "upload" ? "bg-white text-ipa-verde shadow-sm" : "text-gray-400"}`}>
-                      <UploadCloud size={12} /> Upload
-                    </button>
-                    <button type="button" onClick={() => setModoDesktop("link")} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-1 ${modoDesktop === "link" ? "bg-white text-ipa-verde shadow-sm" : "text-gray-400"}`}>
-                      <LinkIcon size={12} /> Link URL
-                    </button>
-                  </div>
-                </div>
-
-                {modoDesktop === "upload" ? (
-                  <input type="file" accept="image/*" onChange={(e) => setArquivoDesktop(e.target.files?.[0] || null)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-ipa-creme file:text-ipa-verde hover:file:bg-ipa-dourado hover:file:text-white transition-all cursor-pointer border border-dashed border-gray-300 rounded-xl p-2" />
-                ) : (
-                  <input type="url" value={imagemDesktopUrl} onChange={(e) => setImagemDesktopUrl(e.target.value)} placeholder="https://..." className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
-                )}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">URL da Imagem Desktop * (Formato Horizontal)</label>
+                <input required type="url" value={imagemDesktopUrl} onChange={(e) => setImagemDesktopUrl(e.target.value)} placeholder="https://..." className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
               </div>
 
-              {/* IMAGEM MOBILE */}
-              <div className="flex flex-col gap-3 pt-4 border-t border-gray-50">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Imagem Mobile (Vertical - Opcional)</label>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button type="button" onClick={() => setModoMobile("upload")} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-1 ${modoMobile === "upload" ? "bg-white text-ipa-verde shadow-sm" : "text-gray-400"}`}>
-                      <UploadCloud size={12} /> Upload
-                    </button>
-                    <button type="button" onClick={() => setModoMobile("link")} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-1 ${modoMobile === "link" ? "bg-white text-ipa-verde shadow-sm" : "text-gray-400"}`}>
-                      <LinkIcon size={12} /> Link URL
-                    </button>
-                  </div>
-                </div>
-
-                {modoMobile === "upload" ? (
-                  <input type="file" accept="image/*" onChange={(e) => setArquivoMobile(e.target.files?.[0] || null)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-600 hover:file:bg-ipa-dourado hover:file:text-white transition-all cursor-pointer border border-dashed border-gray-300 rounded-xl p-2" />
-                ) : (
-                  <input type="url" value={imagemMobileUrl} onChange={(e) => setImagemMobileUrl(e.target.value)} placeholder="https://..." className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
-                )}
-                <p className="text-[10px] text-gray-400">Se deixar em branco, o sistema usará a imagem Desktop no telemóvel.</p>
+              <div className="flex flex-col gap-2 mt-2">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">URL da Imagem Mobile (Opcional - Formato Vertical)</label>
+                <input type="url" value={imagemMobileUrl} onChange={(e) => setImagemMobileUrl(e.target.value)} placeholder="https://..." className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
+                <p className="text-[10px] text-gray-400">Se deixar em branco, o sistema usará a imagem Desktop centralizada no celular.</p>
               </div>
             </div>
 
@@ -237,7 +156,7 @@ export default function NovoBannerPage() {
               {linkAbertura === "modal" && (
                 <div className="flex flex-col gap-2 p-4 bg-yellow-50 border border-yellow-200 rounded-xl mt-2 animate-fade-in">
                   <label className="text-xs font-bold text-yellow-700 uppercase tracking-widest">Texto do Aviso (Modal)</label>
-                  <textarea value={textoAvisoModal} onChange={(e) => setTextoAvisoModal(e.target.value)} placeholder="Atenção: Você está a ser redirecionado para..." rows={2} className="p-3 bg-white border border-yellow-200 rounded-xl outline-none focus:border-yellow-400 resize-none" />
+                  <textarea value={textoAvisoModal} onChange={(e) => setTextoAvisoModal(e.target.value)} placeholder="Atenção: Você está sendo redirecionado para..." rows={2} className="p-3 bg-white border border-yellow-200 rounded-xl outline-none focus:border-yellow-400 resize-none" />
                 </div>
               )}
             </div>
