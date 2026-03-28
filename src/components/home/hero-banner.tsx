@@ -12,14 +12,14 @@ const slides = [
     description: "A autoridade final em matéria de fé e prática.",
     image: "https://images.unsplash.com/photo-1536704231234-beca9772ca68?q=80&w=2070&auto=format&fit=crop",
     imageAlt: "Bíblia Sagrada aberta representando o princípio Sola Scriptura na Igreja Presbiteriana de Aquiraz",
-    link: "/ensino", // <-- Rota de destino
+    link: "/ensino/sermoes", // <-- Rota de destino
   },
   {
     title: "Soli Deo Gloria",
     description: "Criados para o louvor da glória de Deus.",
     image: "https://images.unsplash.com/photo-1586486942853-511cfe2c6313?q=80&w=2070&auto=format&fit=crop",
     imageAlt: "Natureza e criação divina representando Soli Deo Gloria",
-    link: "/ensino",
+    link: "/ensino/sermoes",
   },
   {
     title: "Sola Fide",
@@ -33,14 +33,14 @@ const slides = [
     description: "Só há um mediador entre Deus e os homens, Jesus Cristo.",
     image: "https://images.unsplash.com/photo-1592818868295-f527dbac420d?q=80&w=2070&auto=format&fit=crop",
     imageAlt: "Cruz simbolizando a mediação exclusiva de Cristo",
-    link: "/ensino",
+    link: "/ensino/sermoes",
   },
   {
     title: "Comunhão e Fé",
     description: "Uma família firmada na rocha que é Cristo.",
     image: "https://images.unsplash.com/photo-1606787503474-b28a4072fbc5?q=80&w=2070&auto=format&fit=crop",
     imageAlt: "Membros da igreja em comunhão fraterna",
-    link: "/ensino",
+    link: "/ensino/sermoes",
   },
 ];
 
