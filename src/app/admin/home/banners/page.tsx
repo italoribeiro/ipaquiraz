@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { Plus, ImageIcon, MousePointerClick, Pencil, CalendarClock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import BotaoExcluir from "./BotaoExcluir";
 
 export const dynamic = 'force-dynamic';
 
@@ -122,13 +123,18 @@ export default async function BannersAdminPage() {
                     </div>
                   </td>
                   <td className="p-4 text-center">
-                    <Link 
-                      href={`/admin/home/banners/editar/${banner.id}`}
-                      className="inline-flex p-2 bg-gray-100 text-gray-500 hover:bg-ipa-dourado hover:text-white rounded-lg transition-colors"
-                      title="Editar Banner"
-                    >
-                      <Pencil size={16} />
-                    </Link>
+                    {/* AQUI ESTÁ A MUDANÇA: O botão de editar e o de excluir agora vivem lado a lado */}
+                    <div className="flex items-center justify-center gap-2">
+                      <Link 
+                        href={`/admin/home/banners/editar/${banner.id}`}
+                        className="inline-flex p-2 bg-gray-100 text-gray-500 hover:bg-ipa-dourado hover:text-white rounded-lg transition-colors"
+                        title="Editar Banner"
+                      >
+                        <Pencil size={16} />
+                      </Link>
+                      
+                      <BotaoExcluir id={banner.id} />
+                    </div>
                   </td>
                 </tr>
               );
