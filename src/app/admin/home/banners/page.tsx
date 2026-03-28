@@ -1,287 +1,148 @@
-"use client";
-
-import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Save, Image as ImageIcon, Link as LinkIcon, CalendarClock, Settings, UploadCloud } from "lucide-react";
+import { Plus, ImageIcon, MousePointerClick, Pencil, CalendarClock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function NovoBannerPage() {
-  const router = useRouter();
-  const [carregando, setCarregando] = useState(false);
+export default async function BannersAdminPage() {
+  // Pede o limite de 10 e já pede para o Supabase contar o total exato
+  const { data: banners, count } = await supabase
+    .from("site_banners")
+    .select("*", { count: 'exact' })
+    .order("ordem", { ascending: true })
+    .order("criado_em", { ascending: false })
+    .limit(10); // <--- O Lazy Loading/Limit nativo do banco de dados
 
-  // ESTADOS DO FORMULÁRIO (Textos e Configurações)
-  const [ativo, setAtivo] = useState(true);
-  const [titulo, setTitulo] = useState("");
-  const [subtitulo, setSubtitulo] = useState("");
-  const [textoBotao, setTextoBotao] = useState("");
-  
-  const [linkDestino, setLinkDestino] = useState("");
-  const [linkAbertura, setLinkAbertura] = useState("_self");
-  const [textoAvisoModal, setTextoAvisoModal] = useState("");
-  
-  const [tempoExibicao, setTempoExibicao] = useState(5000);
-  const [overlayOpacidade, setOverlayOpacidade] = useState(50);
-  const [seoAlt, setSeoAlt] = useState("");
-  
-  const [dataInicio, setDataInicio] = useState("");
-  const [dataFim, setDataFim] = useState("");
+  const totalBanners = count || 0;
+  const atingiuLimite = totalBanners >= 10;
 
-  // ESTADOS DE IMAGEM (Flexível: Upload ou Link)
-  const [modoDesktop, setModoDesktop] = useState<"upload" | "link">("upload");
-  const [imagemDesktopUrl, setImagemDesktopUrl] = useState("");
-  const [arquivoDesktop, setArquivoDesktop] = useState<File | null>(null);
-
-  const [modoMobile, setModoMobile] = useState<"upload" | "link">("upload");
-  const [imagemMobileUrl, setImagemMobileUrl] = useState("");
-  const [arquivoMobile, setArquivoMobile] = useState<File | null>(null);
-
-  // FUNÇÃO AUXILIAR DE UPLOAD
-  async function fazerUploadImagem(arquivo: File, prefixo: string) {
-    const extensao = arquivo.name.split('.').pop();
-    const nomeArquivo = `banner_${prefixo}_${Date.now()}.${extensao}`;
+  const verificarStatus = (banner: any) => {
+    if (!banner.ativo) return { texto: "Inativo", cor: "bg-red-100 text-red-700", icone: <XCircle size={14} /> };
     
-    const { data, error } = await supabase.storage
-      .from('site_imagens')
-      .upload(nomeArquivo, arquivo, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (error) throw error;
-
-    const { data: urlData } = supabase.storage
-      .from('site_imagens')
-      .getPublicUrl(nomeArquivo);
-
-    return urlData.publicUrl;
-  }
-
-  // FUNÇÃO PRINCIPAL DE SALVAR
-  async function salvarBanner(e: React.FormEvent) {
-    e.preventDefault();
-    setCarregando(true);
-
-    try {
-      // 1. Validar Imagem Desktop (Obrigatória)
-      if (modoDesktop === "link" && !imagemDesktopUrl) {
-        throw new Error("A URL da imagem Desktop é obrigatória!");
-      }
-      if (modoDesktop === "upload" && !arquivoDesktop) {
-        throw new Error("Selecione um ficheiro de imagem para o Desktop!");
-      }
-
-      // 2. Processar Imagem Desktop
-      let urlFinalDesktop = imagemDesktopUrl;
-      if (modoDesktop === "upload" && arquivoDesktop) {
-        urlFinalDesktop = await fazerUploadImagem(arquivoDesktop, 'desktop');
-      }
-
-      // 3. Processar Imagem Mobile (Opcional)
-      let urlFinalMobile = imagemMobileUrl;
-      if (modoMobile === "upload" && arquivoMobile) {
-        urlFinalMobile = await fazerUploadImagem(arquivoMobile, 'mobile');
-      } else if (modoMobile === "link" && !imagemMobileUrl) {
-        urlFinalMobile = ""; // Se não preencheu, fica vazio
-      }
-
-      // 4. Guardar no Banco de Dados
-      const { error } = await supabase.from("site_banners").insert([{
-        ativo,
-        titulo,
-        subtitulo: subtitulo || null,
-        texto_botao: textoBotao || null,
-        imagem_desktop_url: urlFinalDesktop,
-        imagem_mobile_url: urlFinalMobile || null,
-        link_destino: linkDestino || null,
-        link_abertura: linkAbertura,
-        texto_aviso_modal: textoAvisoModal || null,
-        tempo_exibicao: tempoExibicao,
-        overlay_opacidade: overlayOpacidade,
-        seo_alt: seoAlt || null,
-        data_inicio: dataInicio ? new Date(dataInicio).toISOString() : null,
-        data_fim: dataFim ? new Date(dataFim).toISOString() : null,
-      }]);
-
-      if (error) throw error;
-
-      // Sucesso! Volta para a listagem
-      router.push("/admin/home/banners");
-      router.refresh();
-
-    } catch (err: any) {
-      alert(err.message);
-      setCarregando(false);
+    const agora = new Date();
+    if (banner.data_inicio && new Date(banner.data_inicio) > agora) {
+      return { texto: "Agendado", cor: "bg-yellow-100 text-yellow-700", icone: <CalendarClock size={14} /> };
     }
-  }
+    if (banner.data_fim && new Date(banner.data_fim) < agora) {
+      return { texto: "Expirado", cor: "bg-gray-100 text-gray-600", icone: <XCircle size={14} /> };
+    }
+    
+    return { texto: "No Ar", cor: "bg-green-100 text-green-700", icone: <CheckCircle2 size={14} /> };
+  };
 
   return (
-    <div className="p-10 w-full pb-24 font-sans bg-gray-50/50 min-h-screen flex justify-center">
-      <div className="w-full max-w-4xl">
+    <div className="p-10 pb-24">
+      <header className="flex justify-between items-center mb-10">
+        <div>
+          <h1 className="text-3xl font-black text-ipa-verde uppercase tracking-tighter">Banners da Home</h1>
+          <p className="text-gray-500 font-medium mt-2">
+            Gerencie as imagens, links e métricas do carrossel principal. 
+            <span className="ml-2 font-bold text-ipa-dourado">({totalBanners}/10)</span>
+          </p>
+        </div>
         
-        <Link href="/admin/home/banners" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-ipa-verde transition-colors mb-8">
-          <ChevronLeft size={16} /> Voltar para Banners
-        </Link>
-
-        <form onSubmit={salvarBanner} className="flex flex-col gap-8">
-          
-          <div className="flex justify-between items-end mb-2">
-            <h1 className="text-3xl font-black text-ipa-verde uppercase tracking-tighter">
-              Novo Banner
-            </h1>
-            <button type="submit" disabled={carregando} className="bg-ipa-dourado hover:bg-yellow-600 text-white px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-sm flex items-center gap-3 transition-colors shadow-lg">
-              {carregando ? "A processar..." : <><Save size={18} /> Publicar Banner</>}
+        {/* LÓGICA DO LIMITE DE 10 BANNERS */}
+        {atingiuLimite ? (
+          <div className="group relative">
+            <button disabled className="bg-gray-200 text-gray-400 cursor-not-allowed px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm flex items-center gap-2 shadow-sm">
+              <Plus size={18} /> Novo Banner
             </button>
+            {/* Tooltip de Aviso que aparece ao passar o mouse */}
+            <div className="absolute top-full mt-2 right-0 bg-red-600 text-white text-xs font-bold p-3 rounded-lg shadow-xl hidden group-hover:block w-56 text-center z-50 animate-fade-in">
+              <AlertTriangle size={16} className="inline-block mb-1" /> <br/>
+              Limite de 10 banners atingido! Exclua ou desative um banner antigo para adicionar outro.
+            </div>
           </div>
+        ) : (
+          <Link 
+            href="/admin/home/banners/novo" 
+            className="bg-ipa-dourado hover:bg-yellow-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm flex items-center gap-2 transition-colors shadow-md hover:scale-105"
+          >
+            <Plus size={18} /> Novo Banner
+          </Link>
+        )}
+      </header>
 
-          <div className="flex flex-col gap-6">
-            
-            {/* Bloco 1: Textos */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
-              <h3 className="font-black text-ipa-escuro uppercase tracking-widest text-xs flex items-center gap-2 border-b border-gray-50 pb-3">
-                <ImageIcon size={14} className="text-ipa-dourado"/> Conteúdo Principal
-              </h3>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-widest text-gray-500">
+              <th className="p-4 font-bold w-32 text-center">Imagem</th>
+              <th className="p-4 font-bold">Conteúdo</th>
+              <th className="p-4 font-bold">Status</th>
+              <th className="p-4 font-bold text-center">Desempenho</th>
+              <th className="p-4 font-bold text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {banners?.map((banner) => {
+              const status = verificarStatus(banner);
               
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Título Principal *</label>
-                <input required type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex: Domingo da Família" className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde font-bold text-lg" />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Subtítulo (Opcional)</label>
-                <textarea value={subtitulo} onChange={(e) => setSubtitulo(e.target.value)} placeholder="Uma breve descrição..." rows={2} className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde resize-none" />
-              </div>
-            </div>
-
-            {/* Bloco 2: Imagens (AGORA COM UPLOAD E LINK) */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-6">
-              <h3 className="font-black text-ipa-escuro uppercase tracking-widest text-xs flex items-center gap-2 border-b border-gray-50 pb-3">
-                <ImageIcon size={14} className="text-ipa-dourado"/> Imagens Responsivas
-              </h3>
-              
-              {/* IMAGEM DESKTOP */}
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Imagem Desktop * (Horizontal)</label>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button type="button" onClick={() => setModoDesktop("upload")} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-1 ${modoDesktop === "upload" ? "bg-white text-ipa-verde shadow-sm" : "text-gray-400"}`}>
-                      <UploadCloud size={12} /> Upload
-                    </button>
-                    <button type="button" onClick={() => setModoDesktop("link")} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-1 ${modoDesktop === "link" ? "bg-white text-ipa-verde shadow-sm" : "text-gray-400"}`}>
-                      <LinkIcon size={12} /> Link URL
-                    </button>
-                  </div>
-                </div>
-
-                {modoDesktop === "upload" ? (
-                  <input type="file" accept="image/*" onChange={(e) => setArquivoDesktop(e.target.files?.[0] || null)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-ipa-creme file:text-ipa-verde hover:file:bg-ipa-dourado hover:file:text-white transition-all cursor-pointer border border-dashed border-gray-300 rounded-xl p-2" />
-                ) : (
-                  <input type="url" value={imagemDesktopUrl} onChange={(e) => setImagemDesktopUrl(e.target.value)} placeholder="https://..." className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
-                )}
-              </div>
-
-              {/* IMAGEM MOBILE */}
-              <div className="flex flex-col gap-3 pt-4 border-t border-gray-50">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Imagem Mobile (Vertical - Opcional)</label>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button type="button" onClick={() => setModoMobile("upload")} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-1 ${modoMobile === "upload" ? "bg-white text-ipa-verde shadow-sm" : "text-gray-400"}`}>
-                      <UploadCloud size={12} /> Upload
-                    </button>
-                    <button type="button" onClick={() => setModoMobile("link")} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-1 ${modoMobile === "link" ? "bg-white text-ipa-verde shadow-sm" : "text-gray-400"}`}>
-                      <LinkIcon size={12} /> Link URL
-                    </button>
-                  </div>
-                </div>
-
-                {modoMobile === "upload" ? (
-                  <input type="file" accept="image/*" onChange={(e) => setArquivoMobile(e.target.files?.[0] || null)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-600 hover:file:bg-ipa-dourado hover:file:text-white transition-all cursor-pointer border border-dashed border-gray-300 rounded-xl p-2" />
-                ) : (
-                  <input type="url" value={imagemMobileUrl} onChange={(e) => setImagemMobileUrl(e.target.value)} placeholder="https://..." className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
-                )}
-                <p className="text-[10px] text-gray-400">Se deixar em branco, o sistema usará a imagem Desktop no telemóvel.</p>
-              </div>
-            </div>
-
-            {/* Bloco 3: Botão e Link */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
-              <h3 className="font-black text-ipa-escuro uppercase tracking-widest text-xs flex items-center gap-2 border-b border-gray-50 pb-3">
-                <LinkIcon size={14} className="text-ipa-dourado"/> Ação (Botão)
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Texto do Botão</label>
-                  <input type="text" value={textoBotao} onChange={(e) => setTextoBotao(e.target.value)} placeholder="Ex: Saiba Mais" className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Link de Destino</label>
-                  <input type="text" value={linkDestino} onChange={(e) => setLinkDestino(e.target.value)} placeholder="/ensino ou https://..." className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde" />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Comportamento do Link</label>
-                <select value={linkAbertura} onChange={(e) => setLinkAbertura(e.target.value)} className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde cursor-pointer">
-                  <option value="_self">Abrir na mesma página (Padrão)</option>
-                  <option value="_blank">Abrir em nova aba</option>
-                  <option value="modal">Abrir janela de Aviso (Modal)</option>
-                </select>
-              </div>
-
-              {linkAbertura === "modal" && (
-                <div className="flex flex-col gap-2 p-4 bg-yellow-50 border border-yellow-200 rounded-xl mt-2 animate-fade-in">
-                  <label className="text-xs font-bold text-yellow-700 uppercase tracking-widest">Texto do Aviso (Modal)</label>
-                  <textarea value={textoAvisoModal} onChange={(e) => setTextoAvisoModal(e.target.value)} placeholder="Atenção: Você está a ser redirecionado para..." rows={2} className="p-3 bg-white border border-yellow-200 rounded-xl outline-none focus:border-yellow-400 resize-none" />
-                </div>
-              )}
-            </div>
-
-            {/* Bloco 4: Agendamento e Design */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
-                <h3 className="font-black text-ipa-escuro uppercase tracking-widest text-xs flex items-center gap-2 border-b border-gray-50 pb-3">
-                  <CalendarClock size={14} className="text-ipa-dourado"/> Agendamento Automático
-                </h3>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Exibir a partir de:</label>
-                  <input type="datetime-local" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
-                </div>
-                <div className="flex flex-col gap-2 mt-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Ocultar a partir de:</label>
-                  <input type="datetime-local" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
-                </div>
-              </div>
-
-              <div className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
-                <h3 className="font-black text-ipa-escuro uppercase tracking-widest text-xs flex items-center gap-2 border-b border-gray-50 pb-3">
-                  <Settings size={14} className="text-ipa-dourado"/> Design & SEO
-                </h3>
-                <div className="flex flex-col gap-2 mt-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest flex justify-between">
-                    Escurecer Imagem <span>{overlayOpacidade}%</span>
-                  </label>
-                  <input type="range" min="0" max="90" step="10" value={overlayOpacidade} onChange={(e) => setOverlayOpacidade(Number(e.target.value))} className="w-full accent-ipa-verde mt-2" />
-                </div>
-                <div className="flex flex-col gap-2 mt-4">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Tempo na Tela (Milissegundos)</label>
-                  <input type="number" step="1000" min="2000" value={tempoExibicao} onChange={(e) => setTempoExibicao(Number(e.target.value))} className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
-                  <p className="text-[10px] text-gray-400">Ex: 5000 = 5 segundos</p>
-                </div>
-                <div className="flex flex-col gap-2 mt-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Texto SEO (Acessibilidade)</label>
-                  <input type="text" value={seoAlt} onChange={(e) => setSeoAlt(e.target.value)} placeholder="Descreva a imagem..." className="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-ipa-verde text-sm" />
-                </div>
-              </div>
-            </div>
-
+              return (
+                <tr key={banner.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="p-4">
+                    <div className="w-28 h-16 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 relative flex items-center justify-center">
+                      {banner.imagem_desktop_url ? (
+                        <img 
+                          src={banner.imagem_desktop_url} 
+                          alt={banner.titulo} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ImageIcon className="text-gray-300" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-ipa-escuro">{banner.titulo}</span>
+                      <span className="text-sm text-gray-400 font-medium truncate max-w-xs">
+                        {banner.subtitulo || "Sem subtítulo"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${status.cor}`}>
+                      {status.icone} {status.texto}
+                    </span>
+                  </td>
+                  <td className="p-4 text-center">
+                    <div className="inline-flex flex-col items-center justify-center bg-gray-50 border border-gray-100 rounded-lg px-4 py-1.5 min-w-[80px]">
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        <MousePointerClick size={12} /> Cliques
+                      </span>
+                      <span className="text-lg font-black text-ipa-verde">
+                        {banner.cliques || 0}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-4 text-center">
+                    <Link 
+                      href={`/admin/home/banners/editar/${banner.id}`}
+                      className="inline-flex p-2 bg-gray-100 text-gray-500 hover:bg-ipa-dourado hover:text-white rounded-lg transition-colors"
+                      title="Editar Banner"
+                    >
+                      <Pencil size={16} />
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        
+        {(!banners || banners.length === 0) && (
+          <div className="p-16 flex flex-col items-center justify-center text-center">
+            <ImageIcon size={48} className="text-gray-200 mb-4" />
+            <h3 className="text-lg font-bold text-gray-400">Nenhum banner encontrado</h3>
+            <p className="text-sm text-gray-400 mt-1">Clique em "Novo Banner" para adicionar o primeiro destaque da Home.</p>
           </div>
-        </form>
+        )}
       </div>
     </div>
   );
