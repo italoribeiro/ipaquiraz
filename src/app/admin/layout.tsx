@@ -14,46 +14,45 @@ import {
   LogOut,
   Menu,
   X,
-  ImageIcon // <-- Adicionei o ícone de imagem aqui
+  ImageIcon,
+  ExternalLink // <-- Novo ícone para o link externo
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [menuAberto, setMenuAberto] = useState(false);
   const pathname = usePathname();
 
-  // Função para fechar o menu ao clicar em um link no mobile
   const fecharMenu = () => setMenuAberto(false);
-
-  // Lógica para verificar se a rota de banners está ativa
   const isBannersActive = pathname.startsWith('/admin/home/banners');
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden">
       
-      {/* HEADER MOBILE (Visível apenas em telas pequenas) */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-ipa-verde text-white flex items-center justify-between px-6 z-40 shadow-md">
+      {/* HEADER MOBILE - Z-index aumentado para 60 */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-ipa-verde text-white flex items-center justify-between px-6 z-[60] shadow-md">
         <span className="font-black tracking-widest text-sm uppercase">
           IP Aquiraz <span className="text-ipa-dourado">Admin</span>
         </span>
         <button 
           onClick={() => setMenuAberto(!menuAberto)}
-          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+          className="p-3 -mr-2 hover:bg-white/10 active:bg-white/20 rounded-lg transition-colors touch-manipulation"
+          aria-label="Abrir menu"
         >
-          {menuAberto ? <X size={24} /> : <Menu size={24} />}
+          {menuAberto ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* OVERLAY MOBILE */}
+      {/* OVERLAY MOBILE - Z-index aumentado */}
       {menuAberto && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/60 z-40 transition-opacity"
+          className="lg:hidden fixed inset-0 bg-black/60 z-[60] transition-opacity"
           onClick={fecharMenu}
         />
       )}
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR - Z-index aumentado para 70 */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50
+        fixed lg:static inset-y-0 left-0 z-[70]
         w-72 bg-ipa-verde text-white flex flex-col shadow-2xl overflow-y-auto
         transform transition-transform duration-300 ease-in-out
         ${menuAberto ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
@@ -61,7 +60,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         
         {/* LOGO AREA */}
         <div className="hidden lg:flex p-8 border-b border-white/5 flex-col items-center">
-          <span className="font-black tracking-widest text-lg uppercase leading-none">
+          <span className="font-black tracking-widest text-lg uppercase leading-none text-center">
             IP Aquiraz
           </span>
           <span className="text-ipa-dourado text-[10px] font-black uppercase tracking-[0.3em] mt-2">
@@ -71,8 +70,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         
         <nav className="flex-1 py-8 px-4 space-y-8 mt-16 lg:mt-0">
           
+          {/* BOTÃO VISUALIZAR SITE (NOVO) */}
+          <div className="px-2 mb-4">
+            <Link 
+              href="/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 bg-white/10 hover:bg-ipa-dourado text-white rounded-xl transition-all text-[11px] font-black uppercase tracking-widest border border-white/5 group"
+            >
+              <ExternalLink size={14} className="group-hover:scale-110 transition-transform" /> 
+              Visualizar Site
+            </Link>
+          </div>
+
           {/* DASHBOARD GERAL */}
-          <div>
+          <div className="space-y-1">
             <Link 
               href="/admin" 
               onClick={fecharMenu}
@@ -88,13 +100,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <p className="px-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-3">
               Ministério da Palavra
             </p>
-            <Link href="/admin/sermoes" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/sermoes" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group text-white/80 hover:text-white">
               <BookOpen size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Sermões
             </Link>
-            <Link href="/admin/categorias" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/categorias" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group text-white/80 hover:text-white">
               <FolderTree size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Categorias
             </Link>
-            <Link href="/admin/autores" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/autores" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group text-white/80 hover:text-white">
               <Users size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Autores
             </Link>
           </div>
@@ -104,15 +116,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <p className="px-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-3">
               Educação e EBD
             </p>
-            <Link href="/admin/ebd/materiais" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/ebd/materiais" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group text-white/80 hover:text-white">
               <Library size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Biblioteca de Recursos
             </Link>
-            <Link href="/admin/ebd/categorias" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group">
+            <Link href="/admin/ebd/categorias" onClick={fecharMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-wider group text-white/80 hover:text-white">
               <BookmarkCheck size={18} className="text-ipa-dourado group-hover:scale-110 transition-transform" /> Categorias de Ensino
             </Link>
           </div>
 
-          {/* --- NOVO GRUPO: SITE PRINCIPAL --- */}
+          {/* GRUPO 3: SITE PRINCIPAL */}
           <div className="space-y-1">
             <p className="px-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-3">
               Site Principal
@@ -120,7 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link 
               href="/admin/home/banners" 
               onClick={fecharMenu} 
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-[11px] font-bold uppercase tracking-wider group ${isBannersActive ? 'bg-ipa-dourado text-white' : 'hover:bg-white/10'}`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-[11px] font-bold uppercase tracking-wider group ${isBannersActive ? 'bg-ipa-dourado text-white' : 'hover:bg-white/10 text-white/80 hover:text-white'}`}
             >
               <ImageIcon size={18} className={isBannersActive ? 'text-white' : 'text-ipa-dourado group-hover:scale-110 transition-transform'} /> 
               Banners da Home
@@ -130,15 +142,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* FOOTER DA SIDEBAR */}
-        <div className="p-4 border-t border-white/5">
+        <div className="p-4 border-t border-white/5 space-y-2">
             <Link href="/" className="flex items-center justify-center gap-2 w-full py-3 bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-400 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest">
               <LogOut size={14} /> Sair do Painel
             </Link>
+            <p className="text-center text-[8px] text-white/20 uppercase tracking-widest font-bold">
+              IP Aquiraz CMS v1.0
+            </p>
         </div>
       </aside>
 
       {/* ÁREA DE CONTEÚDO */}
-      <main className="flex-1 overflow-y-auto bg-gray-50/50 pt-16 lg:pt-0 w-full">
+      <main className="flex-1 overflow-y-auto bg-gray-50/50 pt-16 lg:pt-0 w-full relative">
         {children}
       </main>
     </div>
