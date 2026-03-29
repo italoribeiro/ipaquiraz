@@ -7,6 +7,7 @@ import {
   Plus, Calendar, User, Folder, Link as LinkIcon, AlertCircle
 } from "lucide-react";
 
+import { POST_STATUS, POST_STATUS_LABEL } from "@/lib/constants";
 export default function NovoPostPage() {
   // Estados Principais
   const [titulo, setTitulo] = useState("");
@@ -16,7 +17,7 @@ export default function NovoPostPage() {
   const [categoria, setCategoria] = useState("");
   
   // Estados da Sidebar
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<number | "">("");
   const [dataPublicacao, setDataPublicacao] = useState("");
   const [imagemCapa, setImagemCapa] = useState("");
   const [youtubeId, setYoutubeId] = useState("");
@@ -215,18 +216,22 @@ export default function NovoPostPage() {
             <hr className="border-gray-50" />
 
             {/* STATUS */}
+           {/* STATUS */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Status da Publicação</label>
               <select 
                 value={status} 
-                onChange={(e) => setStatus(e.target.value)}
+                onChange={(e) => setStatus(Number(e.target.value))}
                 className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none font-bold text-ipa-escuro"
                 required
               >
                 <option value="" disabled>Selecione o status...</option>
-                <option value="publicado">🟢 Publicado</option>
-                <option value="rascunho">🟡 Rascunho</option>
-                <option value="inativo">🔴 Inativo</option>
+                {/* Renderiza as opções dinamicamente baseadas nas suas constantes */}
+                {Object.entries(POST_STATUS_LABEL).map(([valor, { texto }]) => (
+                  <option key={valor} value={valor}>
+                    {texto}
+                  </option>
+                ))}
               </select>
             </div>
 
