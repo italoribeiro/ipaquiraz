@@ -14,6 +14,7 @@ export const metadata: Metadata = {
     default: "Igreja Presbiteriana em Aquiraz",
     template: "%s | Igreja Presbiteriana de Aquiraz"
   },
+
   description: "Igreja Presbiteriana em Aquiraz. Cultos, eventos, programação e comunidade cristã reformada no Ceará.",
   keywords: [
     "igreja presbiteriana aquiraz",
