@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Users, ChevronLeft, ChevronRight, Hash, Globe, Instagram } from "lucide-react";
+import { Plus, Pencil, Users, ChevronLeft, ChevronRight, Hash, Globe, Instagram } from "lucide-react";
+import BotaoExcluir from "@/components/admin/BotaoExcluir"; // Importando o componente que criamos
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export default async function AutoresPage({ searchParams }: { searchParams: Prom
             <Users size={32} /> Autores
           </h1>
           <p className="text-gray-500 font-medium mt-1">
-            Gerencie as pessoas que escrevem os artigos e notícias.
+            Gerencie as pessoas que escrevem os artigos e notícias da IP Aquiraz.
           </p>
         </div>
 
@@ -84,9 +85,9 @@ export default async function AutoresPage({ searchParams }: { searchParams: Prom
                     <span className="text-xs text-gray-500 line-clamp-1 italic">"{autor.bio || "Sem biografia..."}"</span>
                   </td>
                   <td className="p-4">
-                    <div className="flex justify-center gap-2">
-                      {autor.redes_social_json?.instagram && <Instagram size={14} className="text-pink-400" />}
-                      {autor.redes_social_json?.site && <Globe size={14} className="text-blue-400" />}
+                    <div className="flex justify-center gap-2 text-gray-300">
+                      {autor.redes_social_json?.instagram && <Instagram size={14} className="hover:text-pink-400 cursor-pointer" />}
+                      {autor.redes_social_json?.site && <Globe size={14} className="hover:text-blue-400 cursor-pointer" />}
                     </div>
                   </td>
                   <td className="p-4 text-right">
@@ -97,9 +98,13 @@ export default async function AutoresPage({ searchParams }: { searchParams: Prom
                       >
                         <Pencil size={16} />
                       </Link>
-                      <button className="p-2 bg-gray-50 text-gray-400 hover:bg-red-500 hover:text-white rounded-lg transition-all">
-                        <Trash2 size={16} />
-                      </button>
+                      
+                      {/* CHAMADA DO COMPONENTE DE EXCLUIR 👇 */}
+                      <BotaoExcluir 
+                        id={autor.id} 
+                        tabela="site_post_authors" 
+                        nomeItem={autor.nome} 
+                      />
                     </div>
                   </td>
                 </tr>
@@ -116,12 +121,12 @@ export default async function AutoresPage({ searchParams }: { searchParams: Prom
             </p>
             <div className="flex gap-1">
               {page > 1 && (
-                <Link href={`/admin/posts/autores?page=${page - 1}`} className="p-2 bg-white border border-gray-200 rounded-lg hover:text-ipa-verde">
+                <Link href={`/admin/posts/autores?page=${page - 1}`} className="p-2 bg-white border border-gray-200 rounded-lg hover:text-ipa-verde transition-all">
                   <ChevronLeft size={20} />
                 </Link>
               )}
               {page < totalPages && (
-                <Link href={`/admin/posts/autores?page=${page + 1}`} className="p-2 bg-white border border-gray-200 rounded-lg hover:text-ipa-verde">
+                <Link href={`/admin/posts/autores?page=${page + 1}`} className="p-2 bg-white border border-gray-200 rounded-lg hover:text-ipa-verde transition-all">
                   <ChevronRight size={20} />
                 </Link>
               )}
