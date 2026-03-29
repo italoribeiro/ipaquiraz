@@ -1,187 +1,246 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
-import { Metadata } from "next";
 import { Search, Calendar, Eye, TrendingUp, Clock, ChevronLeft, ChevronRight, User } from "lucide-react";
 
+// Inicializa o Supabase no lado do cliente
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export const dynamic = 'force-dynamic';
-
-export async function generateMetadata({ searchParams }: any): Promise<Metadata> {
-  const params = await searchParams;
-  const query = params.q;
-  return {
-    title: query ? `Busca: ${query} | IP Aquiraz` : "Notícias e Artigos | IP Aquiraz",
-    description: "Artigos, notícias e estudos teológicos da Igreja Presbiteriana de Aquiraz.",
-  };
-}
-
-export default async function NoticiasPage({ searchParams }: { searchParams: Promise<any> | any }) {
-  const params = await searchParams;
-  const page = Number(params?.page) || 1;
-  const query = params?.q || "";
-  const category = params?.cat || "";
+export default function NoticiasPage({ searchParams }: { searchParams: any }) {
+  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [destaque, setDestaque] = useState<any>(null);
+  const [categorias, setCategorias] = useState<any[]>([]);
+  const [maisLidas, setMaisLidas] = useState<any[]>([]);
+  const [recentesRodape, setRecentesRodape] = useState<any[]>([]);
   
-  const LIMIT = 16; // Aumentado para 16 para fechar grid de 4 colunas perfeitamente
-  const from = (page - 1) * LIMIT;
-  const to = from + LIMIT - 1;
+  const [totalPosts, setTotalPosts] = useState(0);
+  const page = Number(searchParams?.page) || 1;
+  const query = searchParams?.q || "";
+  const category = searchParams?.cat || "";
+  
+  const LIMIT = 16;
 
-  // 1. Busca Destaque Principal (Estilo Desiring God: Imagem lateral + Texto)
-  const { data: destaquePrincipal } = await supabase.from("site_posts").select("*, site_post_categories(nome), site_post_authors(nome)").eq("is_destaque", true).eq("status", 1).order("publicado_em", { ascending: false }).limit(1).single();
+  useEffect(() => {
+    async function carregarDados() {
+      setLoading(true);
+      const from = (page - 1) * LIMIT;
+      const to = from + LIMIT - 1;
 
-  // 2. Busca Categorias
-  const { data: categorias } = await supabase.from("site_post_categories").select("id, nome").order("nome");
+      // 1. Busca Destaque Principal
+      const { data: feat } = await supabase.from("site_posts")
+        .select("*, site_post_categories(nome), site_post_authors(nome)")
+        .eq("is_destaque", true).eq("status", 1)
+        .order("publicado_em", { ascending: false }).limit(1).single();
+      setDestaque(feat);
 
-  // 3. Busca Sidebar: Mais Lidas e Recentes (que agora ficarão no rodapé em colunas)
-  const { data: maisLidas } = await supabase.from("site_posts").select("titulo, slug, visualizacoes, publicado_em").eq("status", 1).order("visualizacoes", { ascending: false }).limit(6);
-  const { data: ultimasSidebar } = await supabase.from("site_posts").select("titulo, slug, publicado_em, imagem_capa_url").eq("status", 1).order("publicado_em", { ascending: false }).limit(6);
+      // 2. Categorias e Listas Auxiliares
+      const [resCats, resLidas, resRec] = await Promise.all([
+        supabase.from("site_post_categories").select("id, nome").order("nome"),
+        supabase.from("site_posts").select("titulo, slug, visualizacoes, publicado_em").eq("status", 1).order("visualizacoes", { ascending: false }).limit(6),
+        supabase.from("site_posts").select("titulo, slug, publicado_em, imagem_capa_url").eq("status", 1).order("publicado_em", { ascending: false }).limit(6)
+      ]);
 
-  // 4. Query do Grid Principal (4 Colunas)
-  let gridQuery = supabase
-    .from("site_posts")
-    .select("*, site_post_categories(nome)", { count: 'exact' })
-    .eq("status", 1);
+      setCategorias(resCats.data || []);
+      setMaisLidas(resLidas.data || []);
+      setRecentesRodape(resRec.data || []);
 
-  if (query) gridQuery = gridQuery.or(`titulo.ilike.%${query}%,conteudo.ilike.%${query}%`);
-  if (category) gridQuery = gridQuery.eq("categoria_id", category);
+      // 3. Grid Principal com Filtros
+      let gridQuery = supabase.from("site_posts")
+        .select("*, site_post_categories(nome)", { count: 'exact' })
+        .eq("status", 1);
 
-  const { data: posts, count } = await gridQuery.order("publicado_em", { ascending: false }).range(from, to);
-  const totalPages = Math.ceil((count || 0) / LIMIT);
+      if (query) gridQuery = gridQuery.or(`titulo.ilike.%${query}%,conteudo.ilike.%${query}%`);
+      if (category) gridQuery = gridQuery.eq("categoria_id", category);
+
+      const { data: gridData, count } = await gridQuery.order("publicado_em", { ascending: false }).range(from, to);
+      
+      setPosts(gridData || []);
+      setTotalPosts(count || 0);
+      setLoading(false);
+    }
+
+    carregarDados();
+  }, [page, query, category]);
+
+  const totalPages = Math.ceil(totalPosts / LIMIT);
+
+  if (loading) return <div className="h-screen flex items-center justify-center bg-ipa-creme text-ipa-verde font-black uppercase tracking-widest animate-pulse">Carregando...</div>;
 
   return (
     <div className="bg-ipa-creme min-h-screen font-sans text-ipa-escuro">
       
-      {/* HEADER CLEAN */}
-      <header className="pt-32 pb-12 px-6">
-        <div className="max-w-7xl mx-auto border-b border-ipa-verde/10 pb-8 text-center md:text-left">
-          <h1 className="text-4xl md:text-6xl font-serif font-bold text-ipa-verde tracking-tight">Notícias e Artigos</h1>
-          <p className="text-ipa-verde/60 mt-2 font-medium uppercase tracking-[0.2em] text-xs">Igreja Presbiteriana de Aquiraz</p>
+      {/* HEADER: SEGUINDO EXATAMENTE A IMAGEM FORNECIDA */}
+      <header className="pt-40 pb-16 px-6 text-center">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-[10px] font-black uppercase text-ipa-dourado tracking-[0.4em] mb-4">
+            Comunicação e Edificação
+          </p>
+          <h1 className="text-5xl md:text-8xl font-black text-ipa-verde uppercase tracking-tighter leading-[0.9]">
+            Notícias e <br /> Sã Doutrina
+          </h1>
+          <div className="w-20 h-1 bg-ipa-dourado mx-auto mt-10 opacity-30"></div>
         </div>
       </header>
 
-      {/* FILTROS INTEGRADOS AO CREME */}
-      <section className="max-w-7xl mx-auto px-6 mb-16">
-        <form action="/noticias" method="GET" className="flex flex-col md:flex-row gap-4 items-center bg-white/50 p-2 rounded-lg border border-ipa-verde/5">
-          <div className="flex-1 relative w-full">
-            <Search className="absolute left-4 top-3 text-ipa-verde/40" size={16} />
-            <input name="q" defaultValue={query} placeholder="Buscar por assunto..." className="w-full pl-12 pr-4 py-2.5 bg-transparent focus:outline-none text-sm" />
+      {/* CAMPO DE BUSCA: ABAIXO DO HEADER, CLEAN */}
+      <section className="max-w-7xl mx-auto px-6 mb-20">
+        <form action="/noticias" method="GET" className="flex flex-col md:flex-row gap-0 bg-white shadow-sm rounded-lg overflow-hidden border border-ipa-verde/5">
+          <div className="flex-1 relative flex items-center border-r border-ipa-verde/5">
+            <Search className="ml-5 text-ipa-verde/30" size={18} />
+            <input 
+              name="q" 
+              defaultValue={query} 
+              placeholder="Pesquisar artigos ou notícias..." 
+              className="w-full pl-4 pr-6 py-5 bg-transparent focus:outline-none text-sm font-medium" 
+            />
           </div>
-          <select name="cat" defaultValue={category} className="w-full md:w-64 p-2.5 bg-transparent text-sm focus:outline-none font-bold text-ipa-verde border-l border-ipa-verde/10">
-            <option value="">Categorias</option>
-            {categorias?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+          <select 
+            name="cat" 
+            defaultValue={category} 
+            className="p-5 bg-white text-xs font-black uppercase tracking-widest text-ipa-verde focus:outline-none cursor-pointer border-r border-ipa-verde/5"
+          >
+            <option value="">Todas as Categorias</option>
+            {categorias.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
-          <button type="submit" className="w-full md:w-auto bg-ipa-verde text-white px-8 py-2.5 rounded font-bold uppercase text-[11px] tracking-widest hover:bg-ipa-escuro transition-all">Filtrar</button>
+          <button type="submit" className="bg-ipa-verde text-white px-10 py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-ipa-escuro transition-all">
+            Filtrar
+          </button>
         </form>
       </section>
 
       <main className="max-w-7xl mx-auto px-6">
         
-        {/* DESTAQUE PRINCIPAL - ESTILO DESIRING GOD (LADO A LADO) */}
-        {destaquePrincipal && (
-          <section className="mb-24">
-            <Link href={`/noticias/${destaquePrincipal.slug}`} className="grid grid-cols-1 lg:grid-cols-12 gap-12 group items-center">
-              <div className="lg:col-span-7 overflow-hidden rounded-sm">
+        {/* DESTAQUE ESTILO DESIRING GOD (IMAGEM LADO A LADO, SEM DEGRADÊ) */}
+        {destaque && (
+          <section className="mb-32">
+            <Link href={`/noticias/${destaque.slug}`} className="grid grid-cols-1 lg:grid-cols-12 gap-16 group items-center">
+              <div className="lg:col-span-7">
                 <img 
-                  src={destaquePrincipal.imagem_capa_url} 
-                  className="w-full aspect-[16/9] object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700" 
+                  src={destaque.imagem_capa_url} 
+                  className="w-full aspect-[16/9] object-cover rounded-sm shadow-sm group-hover:opacity-90 transition-all" 
                   alt="" 
                 />
               </div>
-              <div className="lg:col-span-5 space-y-4">
-                <span className="text-ipa-dourado font-bold uppercase tracking-[0.2em] text-[10px] block">
-                  {destaquePrincipal.site_post_categories?.nome}
-                </span>
-                <h2 className="text-3xl md:text-5xl font-serif font-bold text-ipa-escuro leading-tight group-hover:text-ipa-verde transition-colors">
-                  {destaquePrincipal.titulo}
+              <div className="lg:col-span-5 space-y-6">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-[1px] bg-ipa-dourado"></span>
+                  <span className="text-ipa-dourado font-black uppercase tracking-[0.2em] text-[10px]">
+                    Destaque
+                  </span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-ipa-escuro leading-[1.1] uppercase tracking-tighter group-hover:text-ipa-verde transition-colors">
+                  {destaque.titulo}
                 </h2>
-                <p className="text-gray-600 leading-relaxed text-lg line-clamp-3">
-                  {destaquePrincipal.resumo}
+                <p className="text-gray-500 leading-relaxed text-lg font-medium">
+                  {destaque.resumo}
                 </p>
-                <div className="pt-4 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-ipa-verde/50">
-                   <User size={14}/> {destaquePrincipal.site_post_authors?.nome}
+                <div className="pt-4 flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-ipa-verde">
+                   <span className="bg-ipa-verde/5 px-3 py-1 rounded-full">{destaque.site_post_categories?.nome}</span>
+                   <span className="text-gray-300">|</span>
+                   <span className="flex items-center gap-2 italic"><User size={12}/> {destaque.site_post_authors?.nome}</span>
                 </div>
               </div>
             </Link>
           </section>
         )}
 
-        {/* FEED DE NOTÍCIAS - GRID 4 COLUNAS */}
-        <section className="mb-24">
-          <div className="flex items-center gap-4 mb-10">
-            <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-ipa-verde shrink-0">Feed de Notícias</h3>
-            <div className="h-[1px] bg-ipa-verde/10 w-full"></div>
+        {/* FEED DE NOTÍCIAS: GRID 4 COLUNAS, RESPONSIVO */}
+        <section className="mb-32">
+          <div className="flex items-center justify-between mb-12 border-b border-ipa-verde/10 pb-4">
+            <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-ipa-verde flex items-center gap-2">
+              <Clock size={16}/> Feed de Notícias
+            </h3>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{totalPosts} registros</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-            {posts?.map((post) => (
-              <Link key={post.id} href={`/noticias/${post.slug}`} className="group space-y-4">
-                <div className="aspect-[4/3] overflow-hidden rounded-sm bg-white">
-                  <img src={post.imagem_capa_url} className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-500" alt="" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-16">
+            {posts.map((post) => (
+              <Link key={post.id} href={`/noticias/${post.slug}`} className="group block">
+                <div className="aspect-[3/2] overflow-hidden rounded-sm bg-gray-100 mb-6">
+                  <img src={post.imagem_capa_url} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" alt="" />
                 </div>
-                <div className="space-y-2">
-                  <span className="text-[9px] font-black text-ipa-dourado uppercase tracking-widest">{post.site_post_categories?.nome}</span>
-                  <h5 className="text-lg font-bold text-ipa-escuro group-hover:text-ipa-verde transition-colors leading-tight font-serif line-clamp-2 italic">{post.titulo}</h5>
-                  <p className="text-gray-500 text-xs line-clamp-2 leading-relaxed">{post.resumo}</p>
+                <div className="space-y-3">
+                  <span className="text-ipa-dourado font-black uppercase tracking-widest text-[9px] block">
+                    {post.site_post_categories?.nome}
+                  </span>
+                  <h5 className="text-lg font-black text-ipa-escuro group-hover:text-ipa-verde transition-colors leading-tight uppercase tracking-tighter italic">
+                    {post.titulo}
+                  </h5>
+                  <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">
+                    {post.resumo}
+                  </p>
                 </div>
               </Link>
             ))}
           </div>
 
-          {/* PAGINAÇÃO CLEAN */}
+          {/* PAGINAÇÃO MINIMALISTA */}
           {totalPages > 1 && (
-            <div className="mt-20 pt-12 border-t border-ipa-verde/5 flex items-center justify-center gap-8">
-               <Link href={`/noticias?page=${page - 1}`} className={`text-xs font-black uppercase tracking-widest flex items-center gap-2 ${page === 1 ? 'opacity-20 pointer-events-none' : 'hover:text-ipa-verde'}`}>
-                 <ChevronLeft size={16}/> Anterior
+            <div className="mt-24 pt-12 border-t border-ipa-verde/5 flex items-center justify-between">
+               <Link href={`/noticias?page=${page - 1}`} className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 px-6 py-3 border border-ipa-verde/10 rounded-full hover:bg-ipa-verde hover:text-white transition-all ${page === 1 ? 'opacity-0 pointer-events-none' : ''}`}>
+                 <ChevronLeft size={14}/> Anterior
                </Link>
-               <span className="text-[10px] font-mono text-ipa-verde/40">{page} / {totalPages}</span>
-               <Link href={`/noticias?page=${page + 1}`} className={`text-xs font-black uppercase tracking-widest flex items-center gap-2 ${page === totalPages ? 'opacity-20 pointer-events-none' : 'hover:text-ipa-verde'}`}>
-                 Próximo <ChevronRight size={16}/>
+               
+               <div className="flex gap-2">
+                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                    <Link key={p} href={`/noticias?page=${p}`} className={`w-8 h-8 flex items-center justify-center rounded-full text-[10px] font-black ${page === p ? 'bg-ipa-verde text-white' : 'text-ipa-verde/40 hover:text-ipa-verde'}`}>
+                      {p}
+                    </Link>
+                 ))}
+               </div>
+
+               <Link href={`/noticias?page=${page + 1}`} className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 px-6 py-3 border border-ipa-verde/10 rounded-full hover:bg-ipa-verde hover:text-white transition-all ${page === totalPages ? 'opacity-0 pointer-events-none' : ''}`}>
+                 Próximo <ChevronRight size={14}/>
                </Link>
             </div>
           )}
         </section>
 
-        {/* RODAPÉ DE INFOS: MAIS LIDAS E RECENTES (2 COLUNAS) */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 pb-32 border-t border-ipa-verde/10 pt-16">
+        {/* RODAPÉ EM 2 COLUNAS: RECENTES E MAIS LIDAS */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-20 pb-40">
           
-          {/* COLUNA: RECENTES */}
-          <div>
-            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-ipa-verde mb-10 flex items-center gap-2">
-              <Clock size={16} /> Publicações Recentes
+          {/* COLUNA 1: RECENTES */}
+          <div className="space-y-10">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-ipa-verde border-b border-ipa-verde/10 pb-4">
+              Recentemente Publicado
             </h4>
             <div className="space-y-8">
-              {ultimasSidebar?.map((item) => (
-                <Link key={item.slug} href={`/noticias/${item.slug}`} className="flex items-start gap-4 group">
-                  <div className="w-20 h-20 rounded-sm overflow-hidden shrink-0">
-                    <img src={item.imagem_capa_url} className="w-full h-full object-cover" alt="" />
+              {recentesRodape.map((item) => (
+                <Link key={item.slug} href={`/noticias/${item.slug}`} className="flex items-center gap-6 group">
+                  <div className="w-20 h-20 rounded-sm overflow-hidden shrink-0 bg-white">
+                    <img src={item.imagem_capa_url} className="w-full h-full object-cover group-hover:opacity-80 transition-all" alt="" />
                   </div>
                   <div className="space-y-1">
-                    <h6 className="text-sm font-bold text-ipa-escuro group-hover:text-ipa-verde transition-colors leading-tight">{item.titulo}</h6>
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{new Date(item.publicado_em).toLocaleDateString('pt-BR')}</p>
+                    <h6 className="text-[15px] font-black text-ipa-escuro group-hover:text-ipa-verde transition-colors leading-tight uppercase tracking-tighter italic">{item.titulo}</h6>
+                    <p className="text-[9px] text-ipa-dourado font-black uppercase tracking-widest">{new Date(item.publicado_em).toLocaleDateString('pt-BR')}</p>
                   </div>
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* COLUNA: MAIS LIDAS (TRENDING) */}
-          <div>
-            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-ipa-verde mb-10 flex items-center gap-2">
-              <TrendingUp size={16} /> Mais Lidas da Semana
+          {/* COLUNA 2: MAIS LIDAS (TRENDING) */}
+          <div className="space-y-10">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-ipa-verde border-b border-ipa-verde/10 pb-4">
+              Os Mais Acessados
             </h4>
-            <div className="space-y-6">
-              {maisLidas?.map((item, index) => (
-                <Link key={item.slug} href={`/noticias/${item.slug}`} className="flex gap-6 group border-b border-ipa-verde/5 pb-4 last:border-none">
-                  <span className="text-2xl font-serif font-black text-ipa-verde/10 group-hover:text-ipa-dourado transition-colors italic">
+            <div className="space-y-8">
+              {maisLidas.map((item, index) => (
+                <Link key={item.slug} href={`/noticias/${item.slug}`} className="flex gap-6 group border-b border-ipa-verde/5 pb-6 last:border-none">
+                  <span className="text-3xl font-black text-ipa-verde/10 group-hover:text-ipa-dourado transition-colors italic">
                     {index + 1}
                   </span>
-                  <div className="space-y-1">
-                    <h6 className="text-sm font-bold text-ipa-escuro group-hover:text-ipa-verde transition-colors leading-tight">{item.titulo}</h6>
+                  <div className="space-y-2">
+                    <h6 className="text-[15px] font-black text-ipa-escuro group-hover:text-ipa-verde transition-colors leading-tight uppercase tracking-tighter">{item.titulo}</h6>
                     <div className="flex items-center gap-4 text-[9px] text-gray-400 font-bold uppercase tracking-widest">
-                       <span className="flex items-center gap-1"><Eye size={10}/> {item.visualizacoes} views</span>
+                       <span className="flex items-center gap-1"><Eye size={10}/> {item.visualizacoes} leituras</span>
+                       <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
                        <span>{new Date(item.publicado_em).toLocaleDateString('pt-BR')}</span>
                     </div>
                   </div>
