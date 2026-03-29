@@ -1,106 +1,125 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { Plus, Trash2, FolderPlus, Loader2, AlertCircle, Link as LinkIcon } from "lucide-react";
+import Link from "next/link";
+import { Plus, Pencil, Trash2, Folder, ChevronLeft, ChevronRight, Hash } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function CategoriasPage() {
-  const [categorias, setCategorias] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [salvando, setSalvando] = useState(false);
-  
-  // Estados do Formulário
-  const [nome, setNome] = useState("");
-  const [slug, setSlug] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [erro, setErro] = useState("");
+const LIMIT = 10;
 
-  const fetchCategorias = async () => {
-    const { data, error } = await supabase.from("site_post_categories").select("*").order("nome");
-    if (!error) setCategorias(data || []);
-    setLoading(false);
-  };
+export default async function CategoriasPage({ searchParams }: { searchParams: Promise<any> | any }) {
+  const params = await searchParams;
+  const page = Number(params?.page) || 1;
+  const from = (page - 1) * LIMIT;
+  const to = from + LIMIT - 1;
 
-  useEffect(() => { fetchCategorias(); }, []);
+  // Busca as categorias com contagem total
+  const { data: categorias, count, error } = await supabase
+    .from("site_post_categories")
+    .select("*", { count: 'exact' })
+    .order("nome", { ascending: true })
+    .range(from, to);
 
-  const handleNomeChange = (val: string) => {
-    setNome(val);
-    const s = val.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
-    setSlug(s);
-  };
-
-  const handleAdicionar = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSalvando(true);
-    const { error } = await supabase.from("site_post_categories").insert([{ nome, slug, descricao }]);
-    
-    if (error) setErro("Erro ao salvar. Verifique se o slug já existe.");
-    else { setNome(""); setSlug(""); setDescricao(""); fetchCategorias(); }
-    setSalvando(false);
-  };
-
-  const handleExcluir = async (id: string) => {
-    if (!confirm("Excluir categoria?")) return;
-    await supabase.from("site_post_categories").delete().eq("id", id);
-    fetchCategorias();
-  };
-
-  if (loading) return <div className="p-20 text-center animate-pulse font-bold text-ipa-verde">CARREGANDO...</div>;
+  const totalPages = Math.ceil((count || 0) / LIMIT);
 
   return (
-    <div className="p-10 max-w-6xl mx-auto font-sans">
-      <h1 className="text-3xl font-black text-ipa-verde uppercase tracking-tighter flex items-center gap-2 mb-10">
-        <FolderPlus size={32} /> Gestão de Categorias
-      </h1>
+    <div className="p-10 pb-24">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-ipa-verde uppercase tracking-tighter flex items-center gap-2">
+            <Folder size={32} /> Categorias
+          </h1>
+          <p className="text-gray-500 font-medium mt-1">
+            Gerencie as tags e classificações das suas notícias.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <form onSubmit={handleAdicionar} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4 h-fit sticky top-10">
-          {erro && <div className="text-red-500 text-xs font-bold flex items-center gap-2"><AlertCircle size={14}/> {erro}</div>}
-          <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-gray-400">Nome</label>
-            <input type="text" value={nome} onChange={(e) => handleNomeChange(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold" required />
-          </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-gray-400 flex items-center gap-1"><LinkIcon size={10}/> Slug</label>
-            <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-mono text-ipa-verde" required />
-          </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-gray-400">Descrição</label>
-            <textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm h-24 resize-none" />
-          </div>
-          <button type="submit" disabled={salvando} className="w-full bg-ipa-verde text-white py-4 rounded-2xl font-black uppercase text-xs hover:bg-ipa-escuro transition-all disabled:opacity-50">
-            {salvando ? "Salvando..." : "Cadastrar Categoria"}
-          </button>
-        </form>
+        <Link 
+          href="/admin/posts/categorias/novo" 
+          className="bg-ipa-verde hover:bg-ipa-escuro text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm flex items-center gap-2 transition-all shadow-md active:scale-95"
+        >
+          <Plus size={18} /> Nova Categoria
+        </Link>
+      </header>
 
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-gray-50 text-[10px] uppercase text-gray-400">
-                <th className="p-5">Categoria / Slug</th>
-                <th className="p-5 text-right">Ações</th>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-[0.2em] text-gray-400">
+              <th className="p-4 font-black">Nome / Slug</th>
+              <th className="p-4 font-black">Descrição</th>
+              <th className="p-4 font-black text-center">ID / UUID</th>
+              <th className="p-4 font-black text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {!categorias || categorias.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="p-10 text-center text-gray-400 font-bold uppercase text-xs tracking-widest">
+                  Nenhuma categoria cadastrada.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {categorias.map(cat => (
-                <tr key={cat.id} className="border-t border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="p-5">
-                    <p className="font-black text-ipa-escuro">{cat.nome}</p>
-                    <p className="text-[10px] font-mono text-gray-400">{cat.slug}</p>
+            ) : (
+              categorias.map((cat) => (
+                <tr key={cat.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="p-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-ipa-escuro">{cat.nome}</span>
+                      <span className="text-[10px] text-ipa-verde font-mono">/{cat.slug}</span>
+                    </div>
                   </td>
-                  <td className="p-5 text-right">
-                    <button onClick={() => handleExcluir(cat.id)} className="p-2 text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={18}/></button>
+                  <td className="p-4 max-w-xs">
+                    <span className="text-xs text-gray-500 line-clamp-1">{cat.descricao || "—"}</span>
+                  </td>
+                  <td className="p-4 text-center">
+                    <div className="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 bg-gray-50 px-2 py-1 rounded">
+                      <Hash size={10} /> {cat.id.slice(0, 8)}...
+                    </div>
+                  </td>
+                  <td className="p-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link 
+                        href={`/admin/posts/categorias/editar/${cat.id}`} 
+                        className="p-2 bg-gray-50 text-gray-400 hover:bg-ipa-dourado hover:text-white rounded-lg transition-all"
+                      >
+                        <Pencil size={16} />
+                      </Link>
+                      {/* O botão de excluir aqui precisaria de um Client Component para o confirm, ou você pode manter o link para uma página de confirmação */}
+                      <button className="p-2 bg-gray-50 text-gray-400 hover:bg-red-500 hover:text-white rounded-lg transition-all">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        {/* PAGINAÇÃO */}
+        {totalPages > 1 && (
+          <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Página {page} de {totalPages}
+            </p>
+            <div className="flex gap-1">
+              {page > 1 && (
+                <Link href={`/admin/posts/categorias?page=${page - 1}`} className="p-2 bg-white border border-gray-200 rounded-lg hover:text-ipa-verde">
+                  <ChevronLeft size={20} />
+                </Link>
+              )}
+              {page < totalPages && (
+                <Link href={`/admin/posts/categorias?page=${page + 1}`} className="p-2 bg-white border border-gray-200 rounded-lg hover:text-ipa-verde">
+                  <ChevronRight size={20} />
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
