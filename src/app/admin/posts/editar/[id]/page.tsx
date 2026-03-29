@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, use } from "react"; // IMPORTANTE: adicionei o 'use' aqui
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 import EditorNoticia from "@/components/admin/EditorNoticia";
 import { POST_STATUS, POST_STATUS_LABEL } from "@/lib/constants";
 import { 
@@ -9,16 +10,23 @@ import {
   Calendar, User, Folder, Link as LinkIcon, AlertCircle, ArrowLeft, Loader2
 } from "lucide-react";
 
-// IMPORTANTE: Tipagem do params atualizada para Promise
+// Inicializa o cliente do Supabase
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export default function EditarPostPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   
-  // Desembrulhando o params usando o novo Hook do React
+  // Desembrulhando o params
   const resolvedParams = use(params);
   const postId = resolvedParams.id;
   
-  // Estado de Carregamento Inicial
+  // Estados de Carregamento e Erro
   const [loading, setLoading] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState("");
 
   // Estados Principais
   const [titulo, setTitulo] = useState("");
@@ -40,38 +48,47 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
   const [seoDescricao, setSeoDescricao] = useState("");
   const [seoKeywords, setSeoKeywords] = useState("");
 
-  // Estado de Erro
-  const [erro, setErro] = useState("");
-
-  // Busca os dados da notícia ao carregar a página
+  // Busca os dados da notícia REAL ao carregar a página
   useEffect(() => {
     const fetchNoticia = async () => {
       try {
-        console.log(`Buscando notícia ID: ${postId}`);
-        
-        // Simulação de resposta da API (Mock)
-        setTimeout(() => {
-          setTitulo("Culto de Ações de Graças");
-          setSlug("culto-de-acoes-de-gracas");
-          setConteudo("<h2>Celebração Especial</h2><p>Neste domingo teremos um culto especial...</p>");
-          setAutor("Italo Ribeiro");
-          setCategoria("Eventos da Igreja");
-          setStatus(POST_STATUS.PUBLICADO);
-          setDataPublicacao("2026-04-10T19:00");
-          setImagemCapa("https://images.unsplash.com/photo-1438232992991-995b7058bbb3");
-          setYoutubeId("dQw4w9WgXcQ");
-          setIsDestaque(true);
-          setIsSubDestaque(false);
-          setSeoTitulo("Culto de Ações de Graças - IPAquiraz");
-          setSeoDescricao("Participe do nosso culto especial de ações de graças neste domingo.");
-          setSeoKeywords("Culto, Ações de Graças, Igreja, Aquiraz");
+        const { data, error } = await supabase
+          .from('site_posts')
+          .select('*')
+          .eq('id', postId)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setTitulo(data.titulo || "");
+          setSlug(data.slug || "");
+          setConteudo(data.conteudo || "");
           
-          setLoading(false);
-        }, 800);
+          setAutor(data.autor_id || ""); 
+          setCategoria(data.categoria_id || ""); 
+          
+          setStatus(data.status);
+          
+          if (data.publicado_em) {
+            const dataFormatada = new Date(data.publicado_em).toISOString().slice(0, 16);
+            setDataPublicacao(dataFormatada);
+          }
+          
+          setImagemCapa(data.imagem_capa_url || "");
+          setYoutubeId(data.youtube_id || "");
+          setIsDestaque(data.is_destaque || false);
+          setIsSubDestaque(data.is_sub_destaque || false);
+          
+          setSeoTitulo(data.seo_titulo || "");
+          setSeoDescricao(data.seo_descricao || "");
+          setSeoKeywords(data.seo_keywords || "");
+        }
 
       } catch (error) {
         console.error("Erro ao buscar notícia:", error);
-        setErro("Não foi possível carregar os dados da notícia.");
+        setErro("Não foi possível carregar os dados da notícia. Atualize a página e tente novamente.");
+      } finally {
         setLoading(false);
       }
     };
@@ -79,9 +96,9 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
     if (postId) {
       fetchNoticia();
     }
-  }, [postId]); // Atualizado para depender da nova variável
+  }, [postId]);
 
-  // Gerador de Slug (apenas se o usuário decidir alterar o título)
+  // Gerador de Slug
   const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const novoTitulo = e.target.value;
     setTitulo(novoTitulo);
@@ -96,8 +113,8 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
     setSlug(slugGerado);
   };
 
-  // Validação e Update
-  const handleAtualizar = (e: React.FormEvent) => {
+  // Validação e envio para o banco de dados
+  const handleAtualizar = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
 
@@ -107,19 +124,43 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
       return;
     }
 
-    const payload = {
-      id: postId, // Atualizado para usar a nova variável
-      titulo, slug, autor, categoria, conteudo, 
-      status, dataPublicacao, imagemCapa, youtubeId, 
-      isDestaque, isSubDestaque, 
-      seo: { titulo: seoTitulo, descricao: seoDescricao, keywords: seoKeywords }
-    };
+    setSalvando(true); // Muda o texto do botão
 
-    console.log("Atualizando (UPDATE) Payload:", payload);
-    alert("Dados validados! Pronto para o UPDATE no Supabase.");
+    try {
+      const { error } = await supabase
+        .from('site_posts')
+        .update({
+          titulo: titulo,
+          slug: slug,
+          conteudo: conteudo,
+          autor_id: autor, // Atenção: Isso deve ser o UUID do autor
+          categoria_id: categoria, // Atenção: Isso deve ser o UUID da categoria
+          status: status,
+          publicado_em: new Date(dataPublicacao).toISOString(),
+          imagem_capa_url: imagemCapa,
+          youtube_id: youtubeId,
+          is_destaque: isDestaque,
+          is_sub_destaque: isSubDestaque,
+          seo_titulo: seoTitulo,
+          seo_descricao: seoDescricao,
+          seo_keywords: seoKeywords,
+        })
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      alert("Notícia atualizada com sucesso!");
+      router.push('/admin/posts');
+
+    } catch (error: any) {
+      console.error("Erro no UPDATE:", error);
+      setErro("Erro ao salvar no banco de dados. " + (error.message || ""));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setSalvando(false);
+    }
   };
 
-  // Tela de Loading enquanto busca os dados
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-ipa-verde">
@@ -132,7 +173,6 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="p-10 pb-32 font-sans">
       
-      {/* Botão Voltar */}
       <button 
         onClick={() => router.back()} 
         className="mb-8 flex items-center gap-2 text-gray-400 hover:text-ipa-escuro font-bold uppercase tracking-widest text-xs transition-colors"
@@ -142,7 +182,6 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
 
       <form onSubmit={handleAtualizar} className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        {/* COLUNA DA ESQUERDA: CONTEÚDO (75%) */}
         <div className="lg:col-span-3 space-y-6">
           
           {erro && (
@@ -177,12 +216,13 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white p-4 rounded-2xl border border-gray-100 flex flex-col gap-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                <User size={12} /> Autor
+                <User size={12} /> Autor (ID)
               </label>
               <input 
-                list="autores" 
+                type="text"
                 value={autor} 
                 onChange={(e) => setAutor(e.target.value)}
+                placeholder="Cole o ID do autor aqui"
                 className="w-full text-sm outline-none font-bold text-ipa-escuro"
                 required
               />
@@ -190,12 +230,13 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
 
             <div className="bg-white p-4 rounded-2xl border border-gray-100 flex flex-col gap-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                <Folder size={12} /> Categoria
+                <Folder size={12} /> Categoria (ID)
               </label>
               <input 
-                list="categorias" 
+                type="text"
                 value={categoria} 
                 onChange={(e) => setCategoria(e.target.value)}
+                placeholder="Cole o ID da categoria aqui"
                 className="w-full text-sm outline-none font-bold text-ipa-escuro"
                 required
               />
@@ -244,13 +285,17 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
 
-        {/* COLUNA DA DIREITA: SIDEBAR (25%) */}
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 sticky top-10">
             
             <div className="space-y-4">
-               <button type="submit" className="w-full bg-ipa-verde text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-ipa-escuro transition-all shadow-lg shadow-ipa-verde/20 active:scale-95">
-                 <Save size={18} /> Atualizar Notícia
+               <button 
+                 type="submit" 
+                 disabled={salvando}
+                 className={`w-full text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 ${salvando ? 'bg-gray-400 cursor-not-allowed' : 'bg-ipa-verde hover:bg-ipa-escuro shadow-ipa-verde/20'}`}
+               >
+                 {salvando ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                 {salvando ? "Salvando..." : "Atualizar Notícia"}
                </button>
             </div>
 
