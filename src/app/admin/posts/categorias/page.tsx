@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { Plus, Trash2, Folder, Loader2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, FolderPlus, Loader2, AlertCircle, Link as LinkIcon } from "lucide-react";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,175 +11,96 @@ const supabase = createClient(
 
 export default function CategoriasPage() {
   const [categorias, setCategorias] = useState<any[]>([]);
-  const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
+  
+  // Estados do Formulário
+  const [nome, setNome] = useState("");
+  const [slug, setSlug] = useState("");
+  const [descricao, setDescricao] = useState("");
   const [erro, setErro] = useState("");
 
-  // Busca as categorias ao carregar a página
   const fetchCategorias = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("site_post_categories")
-        .select("*")
-        .order("nome");
-
-      if (error) throw error;
-      setCategorias(data || []);
-    } catch (error: any) {
-      console.error("Erro ao buscar categorias:", error);
-      setErro("Erro ao carregar as categorias.");
-    } finally {
-      setLoading(false);
-    }
+    const { data, error } = await supabase.from("site_post_categories").select("*").order("nome");
+    if (!error) setCategorias(data || []);
+    setLoading(false);
   };
 
-  useEffect(() => {
-    fetchCategorias();
-  }, []);
+  useEffect(() => { fetchCategorias(); }, []);
 
-  // Adiciona nova categoria
+  const handleNomeChange = (val: string) => {
+    setNome(val);
+    const s = val.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+    setSlug(s);
+  };
+
   const handleAdicionar = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nome.trim()) return;
-
     setSalvando(true);
-    setErro("");
-
-    try {
-      const { error } = await supabase
-        .from("site_post_categories")
-        .insert([{ nome: nome.trim() }]);
-
-      if (error) throw error;
-
-      setNome(""); // Limpa o campo
-      fetchCategorias(); // Atualiza a lista
-    } catch (error: any) {
-      console.error("Erro ao adicionar:", error);
-      setErro("Erro ao salvar a categoria. Verifique se ela já existe.");
-    } finally {
-      setSalvando(false);
-    }
+    const { error } = await supabase.from("site_post_categories").insert([{ nome, slug, descricao }]);
+    
+    if (error) setErro("Erro ao salvar. Verifique se o slug já existe.");
+    else { setNome(""); setSlug(""); setDescricao(""); fetchCategorias(); }
+    setSalvando(false);
   };
 
-  // Exclui uma categoria
-  const handleExcluir = async (id: string, nomeCategoria: string) => {
-    if (!window.confirm(`Tem certeza que deseja excluir a categoria "${nomeCategoria}"?`)) return;
-
-    try {
-      const { error } = await supabase
-        .from("site_post_categories")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-
-      fetchCategorias(); // Atualiza a lista após excluir
-    } catch (error: any) {
-      console.error("Erro ao excluir:", error);
-      alert("Não foi possível excluir. Talvez existam notícias usando esta categoria.");
-    }
+  const handleExcluir = async (id: string) => {
+    if (!confirm("Excluir categoria?")) return;
+    await supabase.from("site_post_categories").delete().eq("id", id);
+    fetchCategorias();
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-ipa-verde">
-        <Loader2 size={40} className="animate-spin" />
-        <p className="font-bold tracking-widest uppercase text-sm">Carregando categorias...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-20 text-center animate-pulse font-bold text-ipa-verde">CARREGANDO...</div>;
 
   return (
-    <div className="p-10 pb-32 font-sans max-w-5xl mx-auto">
-      <header className="mb-10">
-        <h1 className="text-3xl font-black text-ipa-verde uppercase tracking-tighter flex items-center gap-2">
-          <Folder size={32} /> Categorias de Notícias
-        </h1>
-        <p className="text-gray-500 font-medium mt-1">
-          Gerencie as categorias para organizar as publicações do site.
-        </p>
-      </header>
+    <div className="p-10 max-w-6xl mx-auto font-sans">
+      <h1 className="text-3xl font-black text-ipa-verde uppercase tracking-tighter flex items-center gap-2 mb-10">
+        <FolderPlus size={32} /> Gestão de Categorias
+      </h1>
 
-      {erro && (
-        <div className="bg-red-50 text-red-500 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold mb-6">
-          <AlertCircle size={20} />
-          {erro}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        
-        {/* FORMULÁRIO DE CADASTRO */}
-        <div className="md:col-span-1 space-y-6">
-          <form onSubmit={handleAdicionar} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm sticky top-10">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Nome da Categoria</label>
-                <input 
-                  type="text" 
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  placeholder="Ex: Eventos da Igreja"
-                  className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none text-sm font-bold text-ipa-escuro"
-                  required
-                />
-              </div>
-              
-              <button 
-                type="submit" 
-                disabled={salvando || !nome.trim()}
-                className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 ${salvando || !nome.trim() ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-ipa-verde text-white hover:bg-ipa-escuro shadow-ipa-verde/20'}`}
-              >
-                {salvando ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-                {salvando ? "Adicionando..." : "Adicionar Categoria"}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* LISTAGEM DE CATEGORIAS */}
-        <div className="md:col-span-2">
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-[0.2em] text-gray-400">
-                  <th className="p-4 font-black">Nome</th>
-                  <th className="p-4 font-black text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {categorias.length === 0 ? (
-                  <tr>
-                    <td colSpan={2} className="p-10 text-center text-gray-400 font-bold uppercase text-xs tracking-widest">
-                      Nenhuma categoria cadastrada ainda.
-                    </td>
-                  </tr>
-                ) : (
-                  categorias.map((cat) => (
-                    <tr key={cat.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                      <td className="p-4">
-                        <span className="font-bold text-ipa-escuro">{cat.nome}</span>
-                        <div className="text-[9px] text-gray-400 mt-1 font-mono">ID: {cat.id}</div>
-                      </td>
-                      <td className="p-4 text-right">
-                        <button 
-                          onClick={() => handleExcluir(cat.id, cat.nome)}
-                          className="p-2 text-gray-400 hover:bg-red-500 hover:text-white rounded-lg transition-all inline-flex items-center justify-center"
-                          title="Excluir Categoria"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <form onSubmit={handleAdicionar} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4 h-fit sticky top-10">
+          {erro && <div className="text-red-500 text-xs font-bold flex items-center gap-2"><AlertCircle size={14}/> {erro}</div>}
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-gray-400">Nome</label>
+            <input type="text" value={nome} onChange={(e) => handleNomeChange(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold" required />
           </div>
-        </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-gray-400 flex items-center gap-1"><LinkIcon size={10}/> Slug</label>
+            <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-mono text-ipa-verde" required />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-gray-400">Descrição</label>
+            <textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm h-24 resize-none" />
+          </div>
+          <button type="submit" disabled={salvando} className="w-full bg-ipa-verde text-white py-4 rounded-2xl font-black uppercase text-xs hover:bg-ipa-escuro transition-all disabled:opacity-50">
+            {salvando ? "Salvando..." : "Cadastrar Categoria"}
+          </button>
+        </form>
 
+        <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-gray-50 text-[10px] uppercase text-gray-400">
+                <th className="p-5">Categoria / Slug</th>
+                <th className="p-5 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categorias.map(cat => (
+                <tr key={cat.id} className="border-t border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="p-5">
+                    <p className="font-black text-ipa-escuro">{cat.nome}</p>
+                    <p className="text-[10px] font-mono text-gray-400">{cat.slug}</p>
+                  </td>
+                  <td className="p-5 text-right">
+                    <button onClick={() => handleExcluir(cat.id)} className="p-2 text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={18}/></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
