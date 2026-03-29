@@ -10,10 +10,11 @@ import Underline from '@tiptap/extension-underline';
 import Image from '@tiptap/extension-image';
 
 // Importando as extensões de Tabela
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
+// Importando as extensões de Tabela da forma correta (com chaves)
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 
 import { 
   Bold, Italic, Underline as UnderlineIcon, 
