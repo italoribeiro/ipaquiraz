@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react"; // IMPORTANTE: adicionei o 'use' aqui
 import { useRouter } from "next/navigation";
 import EditorNoticia from "@/components/admin/EditorNoticia";
 import { POST_STATUS, POST_STATUS_LABEL } from "@/lib/constants";
@@ -9,8 +9,13 @@ import {
   Calendar, User, Folder, Link as LinkIcon, AlertCircle, ArrowLeft, Loader2
 } from "lucide-react";
 
-export default function EditarPostPage({ params }: { params: { id: string } }) {
+// IMPORTANTE: Tipagem do params atualizada para Promise
+export default function EditarPostPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  
+  // Desembrulhando o params usando o novo Hook do React
+  const resolvedParams = use(params);
+  const postId = resolvedParams.id;
   
   // Estado de Carregamento Inicial
   const [loading, setLoading] = useState(true);
@@ -42,10 +47,7 @@ export default function EditarPostPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchNoticia = async () => {
       try {
-        // Aqui vai entrar a sua lógica real do Supabase:
-        // const { data, error } = await supabase.from('noticias').select('*').eq('id', params.id).single();
-        
-        console.log(`Buscando notícia ID: ${params.id}`);
+        console.log(`Buscando notícia ID: ${postId}`);
         
         // Simulação de resposta da API (Mock)
         setTimeout(() => {
@@ -65,7 +67,7 @@ export default function EditarPostPage({ params }: { params: { id: string } }) {
           setSeoKeywords("Culto, Ações de Graças, Igreja, Aquiraz");
           
           setLoading(false);
-        }, 800); // Simulando delay de rede
+        }, 800);
 
       } catch (error) {
         console.error("Erro ao buscar notícia:", error);
@@ -74,10 +76,10 @@ export default function EditarPostPage({ params }: { params: { id: string } }) {
       }
     };
 
-    if (params.id) {
+    if (postId) {
       fetchNoticia();
     }
-  }, [params.id]);
+  }, [postId]); // Atualizado para depender da nova variável
 
   // Gerador de Slug (apenas se o usuário decidir alterar o título)
   const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,7 +108,7 @@ export default function EditarPostPage({ params }: { params: { id: string } }) {
     }
 
     const payload = {
-      id: params.id,
+      id: postId, // Atualizado para usar a nova variável
       titulo, slug, autor, categoria, conteudo, 
       status, dataPublicacao, imagemCapa, youtubeId, 
       isDestaque, isSubDestaque, 
@@ -115,7 +117,6 @@ export default function EditarPostPage({ params }: { params: { id: string } }) {
 
     console.log("Atualizando (UPDATE) Payload:", payload);
     alert("Dados validados! Pronto para o UPDATE no Supabase.");
-    // router.push('/admin/posts'); // Volta para a listagem após salvar
   };
 
   // Tela de Loading enquanto busca os dados
