@@ -1,9 +1,10 @@
 // src/app/admin/posts/page.tsx
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
-import { Plus, Eye, Pencil, Trash2, Newspaper, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Eye, Pencil, Newspaper, ChevronLeft, ChevronRight } from "lucide-react";
 import { POST_STATUS_LABEL } from "@/lib/constants";
 import BarraBuscaPosts from "./BarraBuscaPosts";
+import BotaoExcluir from "@/components/admin/BotaoExcluir"; // IMPORTADO AQUI
 
 export const dynamic = 'force-dynamic';
 
@@ -12,14 +13,13 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const LIMIT = 10; // Reduzido para 10 para maior agilidade
+const LIMIT = 10;
 
 export default async function PostsAdminPage({ 
   searchParams 
 }: { 
   searchParams: Promise<any> | any 
 }) {
-  // 1. Aguarda os parâmetros (Essencial para performance e correção de filtros no Next.js 15)
   const params = await searchParams;
   const page = Number(params?.page) || 1;
   const statusFilter = params?.status;
@@ -29,15 +29,12 @@ export default async function PostsAdminPage({
   const from = (page - 1) * LIMIT;
   const to = from + LIMIT - 1;
 
-  // 2. Busca Categorias e Posts em PARALELO (Mais rápido)
   const fetchCategorias = supabase.from("site_post_categories").select("id, nome").order("nome");
   
-  // Prepara a query de posts
   let queryPosts = supabase
     .from("site_posts")
     .select("*, site_post_categories(nome), site_post_authors(nome)", { count: 'exact' });
 
-  // 3. Aplicação Rigorosa de Filtros
   if (statusFilter !== undefined && statusFilter !== null && statusFilter !== "") {
     queryPosts = queryPosts.eq("status", Number(statusFilter));
   }
@@ -50,7 +47,6 @@ export default async function PostsAdminPage({
     queryPosts = queryPosts.ilike("titulo", `%${searchQuery}%`);
   }
 
-  // 4. Ordenação e Range
   queryPosts = queryPosts
     .order("publicado_em", { ascending: false })
     .range(from, to);
@@ -137,9 +133,13 @@ export default async function PostsAdminPage({
                         <Link href={`/admin/posts/editar/${post.id}`} className="p-2 bg-gray-50 text-gray-400 hover:bg-ipa-dourado hover:text-white rounded-lg transition-all">
                           <Pencil size={16} />
                         </Link>
-                        <button className="p-2 bg-gray-50 text-gray-400 hover:bg-red-500 hover:text-white rounded-lg transition-all">
-                          <Trash2 size={16} />
-                        </button>
+                        
+                        {/* SUBSTITUÍDO O BOTÃO ANTIGO PELO NOSSO COMPONENTE INTELIGENTE 👇 */}
+                        <BotaoExcluir 
+                          id={post.id} 
+                          tabela="site_posts" 
+                          nomeItem={post.titulo} 
+                        />
                       </div>
                     </td>
                   </tr>
@@ -166,9 +166,7 @@ export default async function PostsAdminPage({
               )}
               
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                // Lógica para não mostrar 50 botões se tiver muita página
                 if (totalPages > 7 && Math.abs(p - page) > 2 && p !== 1 && p !== totalPages) return null;
-                
                 return (
                   <Link
                     key={p}
