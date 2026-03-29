@@ -17,6 +17,7 @@ export default function Navbar() {
     { name: 'QUEM SOMOS', href: '/quem-somos' },
     { name: 'AGENDA', href: '/programacao' },
     { name: 'ENSINO', href: '/ensino' },
+    { name: 'NOTÍCIAS', href: '/noticias' },
     { name: 'DÍZIMOS', href: '/dizimos' },
   ];
 
