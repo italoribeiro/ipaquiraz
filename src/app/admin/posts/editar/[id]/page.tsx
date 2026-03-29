@@ -383,10 +383,8 @@ export default function EditarPostPage({ params }: { params: Promise<{ id: strin
                 <span className="text-[11px] font-black uppercase tracking-widest text-gray-500 group-hover:text-ipa-verde text-left">Sub Destaque</span>
               </label>
             </div>
-
           </div>
         </div>
-
       </form>
     </div>
   );

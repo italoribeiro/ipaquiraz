@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { Plus, Pencil, Trash2, Folder, ChevronLeft, ChevronRight, Hash } from "lucide-react";
-
+import BotaoExcluir from "@/components/admin/BotaoExcluir";
 export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
@@ -89,9 +89,11 @@ export default async function CategoriasPage({ searchParams }: { searchParams: P
                         <Pencil size={16} />
                       </Link>
                       {/* O botão de excluir aqui precisaria de um Client Component para o confirm, ou você pode manter o link para uma página de confirmação */}
-                      <button className="p-2 bg-gray-50 text-gray-400 hover:bg-red-500 hover:text-white rounded-lg transition-all">
-                        <Trash2 size={16} />
-                      </button>
+                     <BotaoExcluir 
+                        id={cat.id} 
+                        tabela="site_post_categories" 
+                        nomeItem={cat.nome} 
+                      />
                     </div>
                   </td>
                 </tr>
