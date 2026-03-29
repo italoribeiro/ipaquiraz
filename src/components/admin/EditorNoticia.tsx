@@ -2,12 +2,19 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Youtube from '@tiptap/extension-youtube';
-import Placeholder from '@tiptap/extension-placeholder';
+import { Link } from '@tiptap/extension-link';
+import { Youtube } from '@tiptap/extension-youtube';
+import { Underline } from '@tiptap/extension-underline';
+import { TextAlign } from '@tiptap/extension-text-align';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { Placeholder } from '@tiptap/extension-placeholder';
 import { 
-  Bold, Italic, List, Quote, Youtube as YoutubeIcon, 
-  Heading1, Heading2, BookOpen, Code, Layout, Columns, Type
+  Bold, Italic, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, 
+  Table as TableIcon, Quote, Youtube as YoutubeIcon, Code, BookOpen, 
+  Columns, Layout, ChevronDown, List, Heading2
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -16,89 +23,105 @@ const EditorNoticia = ({ value, onChange }: { value: string, onChange: (html: st
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: { levels: [1, 2, 3] }
+      }),
+      Underline,
       Link.configure({ openOnClick: false }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Table.configure({ resizable: true }),
+      TableRow, 
+      TableHeader, 
+      TableCell,
       Youtube.configure({ width: 480, height: 270 }),
-      Placeholder.configure({ placeholder: 'Comece a escrever a notícia ou estudo bíblico...' }),
+      Placeholder.configure({ placeholder: 'Comece seu artigo reformado aqui...' }),
     ],
     content: value,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
+    onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: 'prose prose-sm focus:outline-none min-h-[500px] max-w-none p-6 text-ipa-escuro',
+        class: 'prose prose-sm lg:prose-base focus:outline-none min-h-[600px] max-w-none p-8 text-ipa-escuro shadow-inner bg-white',
       },
     },
   });
 
   if (!editor) return null;
 
-  // TEMPLATES DE ESTRUTURA
-  const inserirTemplateCitacao = () => {
-    editor.chain().focus().insertContent(`
-      <blockquote class="border-l-4 border-ipa-dourado pl-4 italic my-4 text-gray-600 bg-gray-50 p-4 rounded-r-lg">
-        "Insira aqui a citação de um reformador..."
-        <cite class="block mt-2 font-bold text-ipa-verde">— Nome do Autor</cite>
-      </blockquote>
-    `).run();
+  // CORREÇÃO: Usando updateAttributes para aplicar classes CSS personalizadas
+  const aplicarEstilo = (classe: string) => {
+    editor.chain().focus().updateAttributes('paragraph', { class: classe }).run();
   };
 
-  const inserirTemplateVersiculo = () => {
+  const addTable = () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+
+  // Template da Citação flutuante (conforme a imagem que você enviou)
+  const inserirPullQuote = () => {
     editor.chain().focus().insertContent(`
-      <div class="bg-ipa-verde/5 border-2 border-ipa-verde/20 p-6 rounded-2xl my-6 text-center italic">
-        <p class="text-lg text-ipa-escuro font-serif">"Texto do Versículo..."</p>
-        <span class="block mt-3 text-[10px] font-black uppercase tracking-widest text-ipa-verde">— Referência Bíblica</span>
+      <div class="float-right w-full md:w-1/3 ml-0 md:ml-8 mb-6 p-8 border-t-2 border-b-2 border-gray-100 text-2xl font-serif italic text-ipa-escuro leading-relaxed text-center md:text-left">
+        "Insira aqui a frase de impacto que o texto irá contornar..."
       </div>
     `).run();
   };
 
-  const addGrid = (cols: number) => {
-    const content = cols === 1 
-      ? `<div class="w-full p-4 border border-gray-100 rounded-xl mb-4 text-center">Bloco 100%</div>`
-      : `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div class="p-4 border border-gray-100 rounded-xl text-center">Coluna 1</div>
-          <div class="p-4 border border-gray-100 rounded-xl text-center">Coluna 2</div>
-         </div>`;
-    editor.chain().focus().insertContent(content).run();
-  };
-
   return (
-    <div className="border border-gray-100 rounded-3xl overflow-hidden bg-white shadow-sm">
-      <div className="bg-gray-50 border-b border-gray-100 p-2 flex flex-wrap gap-1 sticky top-0 z-10">
-        <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`p-2 rounded hover:bg-white ${editor.isActive('bold') ? 'text-ipa-verde bg-white shadow-sm' : 'text-gray-400'}`}><Bold size={18} /></button>
-        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`p-2 rounded hover:bg-white ${editor.isActive('heading', { level: 2 }) ? 'text-ipa-verde bg-white shadow-sm' : 'text-gray-400'}`}><Heading2 size={18} /></button>
+    <div className="border border-gray-100 rounded-[32px] overflow-hidden bg-white shadow-xl font-sans">
+      {/* TOOLBAR SUPER COMPLETA */}
+      <div className="bg-gray-50/80 backdrop-blur-md border-b border-gray-100 p-3 flex flex-wrap gap-2 sticky top-0 z-20 items-center">
         
-        <div className="w-px h-6 bg-gray-200 mx-1 self-center" />
+        {/* COMBOBOX DE ESTILOS CSS */}
+        <div className="relative group">
+          <button type="button" className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-ipa-verde hover:border-ipa-verde transition-all shadow-sm">
+            Estilos Visuais <ChevronDown size={14} />
+          </button>
+          <div className="absolute hidden group-hover:block top-full left-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl p-2 z-50">
+            <button type="button" onClick={() => editor.chain().focus().setParagraph().updateAttributes('paragraph', { class: '' }).run()} className="w-full text-left p-2.5 hover:bg-gray-50 rounded-lg text-[10px] font-bold uppercase tracking-wider text-gray-400">Texto Padrão</button>
+            <button type="button" onClick={inserirPullQuote} className="w-full text-left p-2.5 hover:bg-ipa-verde/10 rounded-lg text-[10px] font-bold text-ipa-verde uppercase tracking-wider">Pull Quote (Igual Imagem)</button>
+            <button type="button" onClick={() => aplicarEstilo('bg-ipa-verde text-white p-8 rounded-3xl shadow-xl font-serif text-xl')} className="w-full text-left p-2.5 hover:bg-gray-50 rounded-lg text-[10px] font-bold uppercase tracking-wider">Box Destaque IP Aquiraz</button>
+            <button type="button" onClick={() => aplicarEstilo('border-l-4 border-ipa-dourado pl-6 py-2 italic text-gray-500 bg-gray-50 rounded-r-xl')} className="w-full text-left p-2.5 hover:bg-gray-50 rounded-lg text-[10px] font-bold uppercase tracking-wider text-ipa-dourado">Citação Teológica</button>
+          </div>
+        </div>
+
+        <div className="w-px h-6 bg-gray-200 mx-1" />
+
+        {/* FORMATAÇÃO BÁSICA */}
+        <div className="flex bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+          <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`p-2 rounded-lg transition-all ${editor.isActive('bold') ? 'bg-ipa-verde text-white' : 'text-gray-400 hover:bg-gray-50'}`}><Bold size={16} /></button>
+          <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={`p-2 rounded-lg transition-all ${editor.isActive('underline') ? 'bg-ipa-verde text-white' : 'text-gray-400 hover:bg-gray-50'}`}><UnderlineIcon size={16} /></button>
+          <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-2 rounded-lg transition-all ${editor.isActive('italic') ? 'bg-ipa-verde text-white' : 'text-gray-400 hover:bg-gray-50'}`}><Italic size={16} /></button>
+        </div>
         
-        <button type="button" onClick={inserirTemplateCitacao} className="p-2 text-ipa-dourado hover:bg-white rounded flex items-center gap-1 text-[10px] font-black uppercase"><Quote size={14} /> Citação</button>
-        <button type="button" onClick={inserirTemplateVersiculo} className="p-2 text-ipa-verde hover:bg-white rounded flex items-center gap-1 text-[10px] font-black uppercase"><BookOpen size={14} /> Versículo</button>
-        
-        <div className="w-px h-6 bg-gray-200 mx-1 self-center" />
+        {/* ALINHAMENTO */}
+        <div className="flex bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+          <button type="button" onClick={() => editor.chain().focus().setTextAlign('left').run()} className={`p-2 rounded-lg transition-all ${editor.isActive({ textAlign: 'left' }) ? 'bg-ipa-verde text-white' : 'text-gray-400 hover:bg-gray-50'}`}><AlignLeft size={16} /></button>
+          <button type="button" onClick={() => editor.chain().focus().setTextAlign('center').run()} className={`p-2 rounded-lg transition-all ${editor.isActive({ textAlign: 'center' }) ? 'bg-ipa-verde text-white' : 'text-gray-400 hover:bg-gray-50'}`}><AlignCenter size={16} /></button>
+          <button type="button" onClick={() => editor.chain().focus().setTextAlign('right').run()} className={`p-2 rounded-lg transition-all ${editor.isActive({ textAlign: 'right' }) ? 'bg-ipa-verde text-white' : 'text-gray-400 hover:bg-gray-50'}`}><AlignRight size={16} /></button>
+        </div>
 
-        <button type="button" onClick={() => addGrid(1)} className="p-2 text-gray-400 hover:bg-white rounded"><Layout size={18} /></button>
-        <button type="button" onClick={() => addGrid(2)} className="p-2 text-gray-400 hover:bg-white rounded"><Columns size={18} /></button>
+        <div className="w-px h-6 bg-gray-200 mx-1" />
 
-        <div className="w-px h-6 bg-gray-200 mx-1 self-center" />
-
+        {/* TABELAS E MÍDIA */}
+        <button type="button" onClick={addTable} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:border-ipa-verde hover:text-ipa-verde transition-all shadow-sm" title="Inserir Tabela"><TableIcon size={18} /></button>
         <button type="button" onClick={() => {
           const url = prompt('URL do vídeo do YouTube');
           if (url) editor.chain().focus().setYoutubeVideo({ src: url }).run();
-        }} className="p-2 text-red-500 hover:bg-white rounded"><YoutubeIcon size={18} /></button>
-        
-        <button type="button" onClick={() => setShowHtml(!showHtml)} className={`p-2 rounded ml-auto ${showHtml ? 'bg-ipa-verde text-white' : 'text-gray-400 hover:bg-white'}`}>
+        }} className="p-2.5 bg-white border border-gray-200 rounded-xl text-red-500 hover:bg-red-50 transition-all shadow-sm"><YoutubeIcon size={18} /></button>
+
+        {/* MODO CÓDIGO HTML */}
+        <button type="button" onClick={() => setShowHtml(!showHtml)} className={`p-2.5 rounded-xl ml-auto transition-all shadow-sm ${showHtml ? 'bg-ipa-escuro text-white border-ipa-escuro' : 'bg-white border border-gray-200 text-gray-400 hover:text-ipa-verde'}`}>
           <Code size={18} />
         </button>
       </div>
 
       {showHtml ? (
         <textarea 
-          className="w-full h-[500px] p-6 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none"
+          className="w-full h-[600px] p-8 font-mono text-sm bg-gray-900 text-ipa-verde focus:outline-none leading-relaxed border-none"
           value={editor.getHTML()}
           onChange={(e) => editor.commands.setContent(e.target.value)}
         />
       ) : (
-        <EditorContent editor={editor} />
+        <div className="bg-white">
+          <EditorContent editor={editor} />
+        </div>
       )}
     </div>
   );
