@@ -1,20 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 import EditorNoticia from "@/components/admin/EditorNoticia";
 import { 
   Save, Globe, Image as ImageIcon, Youtube as YoutubeIcon,
-  Plus, Calendar, User, Folder, Link as LinkIcon, AlertCircle
+  Plus, Calendar, User, Folder, Link as LinkIcon, AlertCircle, ArrowLeft, Loader2
 } from "lucide-react";
 
-import { POST_STATUS, POST_STATUS_LABEL } from "@/lib/constants";
+import { POST_STATUS_LABEL } from "@/lib/constants";
+
+// Inicializa o cliente do Supabase
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export default function NovoPostPage() {
-  // Estados Principais
+  const router = useRouter();
+
+  // Estados para carregar os Dropdowns
+  const [autoresList, setAutoresList] = useState<any[]>([]);
+  const [categoriasList, setCategoriasList] = useState<any[]>([]);
+  const [carregandoListas, setCarregandoListas] = useState(true);
+
+  // Estados Principais do Formulário
   const [titulo, setTitulo] = useState("");
   const [slug, setSlug] = useState("");
   const [conteudo, setConteudo] = useState("");
-  const [autor, setAutor] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [autorId, setAutorId] = useState("");
+  const [categoriaId, setCategoriaId] = useState("");
   
   // Estados da Sidebar
   const [status, setStatus] = useState<number | "">("");
@@ -29,15 +45,40 @@ export default function NovoPostPage() {
   const [seoDescricao, setSeoDescricao] = useState("");
   const [seoKeywords, setSeoKeywords] = useState("");
 
-  // Estado de Erro para Validação
+  // Estados de Controle de UI
   const [erro, setErro] = useState("");
+  const [salvando, setSalvando] = useState(false);
+
+  // 1. Busca Autores e Categorias do Banco
+  useEffect(() => {
+    const fetchDropdowns = async () => {
+      try {
+        const [resAutores, resCats] = await Promise.all([
+          supabase.from("site_post_authors").select("id, nome").order("nome"),
+          supabase.from("site_post_categories").select("id, nome").order("nome")
+        ]);
+
+        if (resAutores.error) throw resAutores.error;
+        if (resCats.error) throw resCats.error;
+
+        setAutoresList(resAutores.data || []);
+        setCategoriasList(resCats.data || []);
+      } catch (err) {
+        console.error("Erro ao carregar listas:", err);
+        setErro("Não foi possível carregar autores ou categorias.");
+      } finally {
+        setCarregandoListas(false);
+      }
+    };
+
+    fetchDropdowns();
+  }, []);
 
   // Gerador de Slug Automático
   const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const novoTitulo = e.target.value;
     setTitulo(novoTitulo);
     
-    // Cria o slug: minúsculas, remove acentos, troca espaços por hífen
     const slugGerado = novoTitulo
       .toLowerCase()
       .normalize("NFD")
@@ -46,42 +87,72 @@ export default function NovoPostPage() {
       .replace(/(^-|-$)+/g, "");
     
     setSlug(slugGerado);
-    
-    // Preenche o título SEO automaticamente se estiver vazio
     if (!seoTitulo) setSeoTitulo(novoTitulo.slice(0, 60));
   };
 
-  // Validação e Envio
-  const handleSalvar = (e: React.FormEvent) => {
+  // Validação e Envio para o Supabase
+  const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
 
-    // Validação Manual (garante que tudo está preenchido)
-    if (!titulo || !slug || !autor || !categoria || !conteudo || conteudo === "<p></p>" || !seoTitulo || !seoDescricao || !seoKeywords || !status || !dataPublicacao || !imagemCapa || !youtubeId) {
-      setErro("Todos os campos são obrigatórios. Por favor, preencha tudo antes de publicar.");
+    // Validação
+    if (!titulo || !slug || !autorId || !categoriaId || !conteudo || conteudo === "<p></p>" || !status || !dataPublicacao) {
+      setErro("Campos obrigatórios estão vazios. Verifique Título, Autor, Categoria, Conteúdo, Status e Data.");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    const payload = {
-      titulo, slug, autor, categoria, conteudo, 
-      status, dataPublicacao, imagemCapa, youtubeId, 
-      isDestaque, isSubDestaque, 
-      seo: { titulo: seoTitulo, descricao: seoDescricao, keywords: seoKeywords }
-    };
+    setSalvando(true);
 
-    console.log("Salvando Payload Completo:", payload);
-    alert("Passou na validação! Dados no console. Pronto para enviar pro Supabase.");
+    try {
+      // Converte string de keywords para Array
+      const keywordsArray = seoKeywords.split(",").map(k => k.trim()).filter(Boolean);
+
+      const { error: insertError } = await supabase
+        .from('site_posts')
+        .insert([{
+          titulo,
+          slug,
+          conteudo,
+          autor_id: autorId,
+          categoria_id: categoriaId,
+          status,
+          publicado_em: new Date(dataPublicacao).toISOString(),
+          imagem_capa_url: imagemCapa,
+          youtube_id: youtubeId,
+          is_destaque: isDestaque,
+          is_sub_destaque: isSubDestaque,
+          seo_title: seoTitulo,
+          seo_description: seoDescricao,
+          seo_keywords: keywordsArray
+        }]);
+
+      if (insertError) throw insertError;
+
+      router.push('/admin/posts');
+      router.refresh();
+
+    } catch (err: any) {
+      console.error("Erro ao salvar:", err);
+      setErro("Erro ao salvar no banco: " + err.message);
+      setSalvando(false);
+    }
   };
 
   return (
     <div className="p-10 pb-32 font-sans">
+      
+      <button 
+        onClick={() => router.back()} 
+        className="mb-8 flex items-center gap-2 text-gray-400 hover:text-ipa-escuro font-bold uppercase tracking-widest text-[10px] transition-colors"
+      >
+        <ArrowLeft size={14} /> Voltar para Listagem
+      </button>
+
       <form onSubmit={handleSalvar} className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        {/* COLUNA DA ESQUERDA: CONTEÚDO (75%) */}
         <div className="lg:col-span-3 space-y-6">
           
-          {/* Alerta de Erro */}
           {erro && (
             <div className="bg-red-50 text-red-500 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold">
               <AlertCircle size={20} />
@@ -89,7 +160,6 @@ export default function NovoPostPage() {
             </div>
           )}
 
-          {/* TÍTULO E SLUG */}
           <div className="space-y-2">
             <input 
               type="text" 
@@ -107,58 +177,49 @@ export default function NovoPostPage() {
                 value={slug} 
                 onChange={(e) => setSlug(e.target.value)} 
                 className="bg-transparent border-none focus:outline-none w-64 text-ipa-verde font-bold"
-                placeholder="slug-da-noticia"
                 required
               />
             </div>
           </div>
 
-          {/* AUTOR E CATEGORIA (Autocomplete) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* SELECT DE AUTOR */}
             <div className="bg-white p-4 rounded-2xl border border-gray-100 flex flex-col gap-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                 <User size={12} /> Autor
               </label>
-              <input 
-                list="autores" 
-                value={autor} 
-                onChange={(e) => setAutor(e.target.value)}
-                placeholder="Selecione ou digite o autor..."
-                className="w-full text-sm outline-none font-bold text-ipa-escuro"
+              <select 
+                value={autorId}
+                onChange={(e) => setAutorId(e.target.value)}
+                className="w-full text-sm outline-none font-bold text-ipa-escuro bg-transparent"
+                disabled={carregandoListas}
                 required
-              />
-              <datalist id="autores">
-                <option value="Italo Ribeiro" />
-                <option value="Equipe de Redação" />
-                <option value="Colaborador Externo" />
-              </datalist>
+              >
+                <option value="">{carregandoListas ? "Carregando autores..." : "Selecione um autor"}</option>
+                {autoresList.map(a => <option key={a.id} value={a.id}>{a.nome}</option>)}
+              </select>
             </div>
 
+            {/* SELECT DE CATEGORIA */}
             <div className="bg-white p-4 rounded-2xl border border-gray-100 flex flex-col gap-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                 <Folder size={12} /> Categoria
               </label>
-              <input 
-                list="categorias" 
-                value={categoria} 
-                onChange={(e) => setCategoria(e.target.value)}
-                placeholder="Selecione ou digite a categoria..."
-                className="w-full text-sm outline-none font-bold text-ipa-escuro"
+              <select 
+                value={categoriaId}
+                onChange={(e) => setCategoriaId(e.target.value)}
+                className="w-full text-sm outline-none font-bold text-ipa-escuro bg-transparent"
+                disabled={carregandoListas}
                 required
-              />
-              <datalist id="categorias">
-                <option value="Teologia Reformada" />
-                <option value="Eventos da Igreja" />
-                <option value="Estudos Bíblicos" />
-                <option value="Avisos" />
-              </datalist>
+              >
+                <option value="">{carregandoListas ? "Carregando categorias..." : "Selecione uma categoria"}</option>
+                {categoriasList.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              </select>
             </div>
           </div>
           
-          {/* EDITOR TIPTAP */}
           <EditorNoticia value={conteudo} onChange={setConteudo} />
 
-          {/* CAMPOS DE SEO */}
           <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-ipa-verde flex items-center gap-2">
               <Globe size={16} /> Otimização para Google (SEO)
@@ -171,7 +232,6 @@ export default function NovoPostPage() {
                     type="text" 
                     value={seoTitulo}
                     onChange={(e) => setSeoTitulo(e.target.value)}
-                    placeholder="Título que aparece no Google..."
                     className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none text-sm"
                     required
                   />
@@ -193,7 +253,6 @@ export default function NovoPostPage() {
                 <textarea 
                   value={seoDescricao}
                   onChange={(e) => setSeoDescricao(e.target.value)}
-                  placeholder="Resumo da notícia que aparece na busca do Google (máx 160 caracteres)..."
                   className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none text-sm h-[120px] resize-none"
                   required
                 />
@@ -202,40 +261,37 @@ export default function NovoPostPage() {
           </div>
         </div>
 
-        {/* COLUNA DA DIREITA: SIDEBAR (25%) */}
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 sticky top-10">
             
-            {/* BOTÕES DE AÇÃO */}
             <div className="space-y-4">
-               <button type="submit" className="w-full bg-ipa-verde text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-ipa-escuro transition-all shadow-lg shadow-ipa-verde/20 active:scale-95">
-                 <Save size={18} /> Publicar Notícia
+               <button 
+                 type="submit" 
+                 disabled={salvando}
+                 className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 ${salvando ? 'bg-gray-400' : 'bg-ipa-verde text-white hover:bg-ipa-escuro shadow-ipa-verde/20'}`}
+               >
+                 {salvando ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                 {salvando ? "Publicando..." : "Publicar Notícia"}
                </button>
             </div>
 
             <hr className="border-gray-50" />
 
-            {/* STATUS */}
-           {/* STATUS */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Status da Publicação</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Status</label>
               <select 
                 value={status} 
                 onChange={(e) => setStatus(Number(e.target.value))}
                 className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none font-bold text-ipa-escuro"
                 required
               >
-                <option value="" disabled>Selecione o status...</option>
-                {/* Renderiza as opções dinamicamente baseadas nas suas constantes */}
+                <option value="" disabled>Selecione...</option>
                 {Object.entries(POST_STATUS_LABEL).map(([valor, { texto }]) => (
-                  <option key={valor} value={valor}>
-                    {texto}
-                  </option>
+                  <option key={valor} value={valor}>{texto}</option>
                 ))}
               </select>
             </div>
 
-            {/* DATA DE PUBLICAÇÃO */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                 <Calendar size={14} /> Data e Hora
@@ -249,66 +305,49 @@ export default function NovoPostPage() {
               />
             </div>
 
-            {/* IMAGEM DE CAPA */}
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                <ImageIcon size={14} /> Link Imagem de Capa
+                <ImageIcon size={14} /> Capa (URL)
               </label>
               <input 
                 type="url" 
                 value={imagemCapa}
                 onChange={(e) => setImagemCapa(e.target.value)}
-                placeholder="https://..." 
-                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs focus:outline-none" 
+                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs" 
                 required
               />
               {imagemCapa && (
-                <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
-                  <img src={imagemCapa} alt="Preview da Capa" className="w-full h-full object-cover" />
+                <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden border">
+                  <img src={imagemCapa} className="w-full h-full object-cover" alt="" />
                 </div>
               )}
             </div>
 
-            {/* VÍDEO YOUTUBE */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                <YoutubeIcon size={14} /> ID do Vídeo YouTube
+                <YoutubeIcon size={14} /> YouTube ID
               </label>
               <input 
                 type="text" 
                 value={youtubeId}
                 onChange={(e) => setYoutubeId(e.target.value)}
-                placeholder="Ex: dQw4w9WgXcQ" 
-                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs focus:outline-none" 
-                required
+                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs" 
               />
             </div>
 
-            {/* STATUS E DESTAQUE */}
             <div className="space-y-4 pt-4 border-t border-gray-50">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  checked={isDestaque}
-                  onChange={(e) => setIsDestaque(e.target.checked)}
-                  className="w-5 h-5 rounded-lg border-gray-200 text-ipa-verde focus:ring-ipa-verde focus:ring-offset-0" 
-                />
-                <span className="text-[11px] font-black uppercase tracking-widest text-gray-500 group-hover:text-ipa-verde">Notícia Destaque</span>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={isDestaque} onChange={(e) => setIsDestaque(e.target.checked)} className="w-5 h-5 rounded-lg text-ipa-verde focus:ring-ipa-verde" />
+                <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Destaque</span>
               </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  checked={isSubDestaque}
-                  onChange={(e) => setIsSubDestaque(e.target.checked)}
-                  className="w-5 h-5 rounded-lg border-gray-200 text-ipa-verde focus:ring-ipa-verde focus:ring-offset-0" 
-                />
-                <span className="text-[11px] font-black uppercase tracking-widest text-gray-500 group-hover:text-ipa-verde text-left">Sub Destaque</span>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={isSubDestaque} onChange={(e) => setIsSubDestaque(e.target.checked)} className="w-5 h-5 rounded-lg text-ipa-verde focus:ring-ipa-verde" />
+                <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Sub-Destaque</span>
               </label>
             </div>
 
           </div>
         </div>
-
       </form>
     </div>
   );
