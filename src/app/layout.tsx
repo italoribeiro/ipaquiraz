@@ -13,6 +13,13 @@ export const metadata: Metadata = {
   title: {
     default: "Igreja Presbiteriana em Aquiraz",
     template: "%s | Igreja Presbiteriana de Aquiraz"
+    
+  },
+
+  icons: {
+    icon: "/icon.png", // Next.js já mapeia o que está na pasta app
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
 
   description: "Igreja Presbiteriana em Aquiraz. Cultos, eventos, programação e comunidade cristã reformada no Ceará.",
@@ -27,7 +34,10 @@ export const metadata: Metadata = {
     "eventos igreja aquiraz",
     "programação igreja aquiraz",
     "dízimos e ofertas aquiraz",
-    "pedido de oração aquiraz" 
+    "pedido de oração aquiraz" ,
+    "igreja evangelica aquiraz",
+    "igreja cristã aquiraz",
+    "igreja presbiteriana do brasil aquiraz" 
 
    ],
    openGraph: {
