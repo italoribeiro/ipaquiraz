@@ -27,7 +27,12 @@ export const metadata: Metadata = {
     "eventos igreja aquiraz",
     "programação igreja aquiraz",
     "dízimos e ofertas aquiraz",
-    "pedido de oração aquiraz" 
+    "pedido de oração aquiraz" ,
+    "igreja evangélica aquiraz",
+    "igreja cristã aquiraz",
+    "igreja reformada ceará",
+    "cultos semanais aquiraz",
+    "igreja presbiteriana do brasil aquiraz"
 
    ],
    openGraph: {
